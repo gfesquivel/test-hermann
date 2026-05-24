@@ -7,10 +7,10 @@
 <style>
 *{box-sizing:border-box;margin:0;padding:0}
 body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#0C2D5E;color:#fff;min-height:100vh;padding:2rem}
-h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:.4rem;letter-spacing:-.02em}
+h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:.4rem}
 .subtitle{text-align:center;font-size:15px;color:#7AACCC;margin-bottom:2.5rem}
 .total-badge{text-align:center;margin-bottom:2.5rem}
-.total-badge .num{font-size:64px;font-weight:700;line-height:1;color:#fff}
+.total-badge .num{font-size:64px;font-weight:700;line-height:1}
 .total-badge .lbl{font-size:14px;color:#7AACCC;margin-top:.2rem}
 .grid{display:grid;grid-template-columns:1fr 1fr;gap:1.25rem;max-width:800px;margin:0 auto 2.5rem}
 .profile-card{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.12);border-radius:16px;padding:1.5rem;text-align:center}
@@ -32,20 +32,15 @@ h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:.4rem;letter-s
 .status{text-align:center;font-size:13px;color:#7AACCC;margin-top:2rem}
 .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:6px;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
-.error-msg{text-align:center;padding:1rem;background:rgba(255,100,100,.1);border-radius:8px;color:#ff9999;font-size:14px;margin-bottom:1rem;display:none}
 </style>
 </head>
 <body>
 <h1>Test de Hermann · Resultados en vivo</h1>
 <p class="subtitle">Ingeniería Comercial · 5° año · U. de los Andes</p>
-
 <div class="total-badge">
-  <div class="num" id="total">0</div>
+  <div class="num" id="total">—</div>
   <div class="lbl">personas han contestado</div>
 </div>
-
-<div class="error-msg" id="errorMsg"></div>
-
 <div class="grid">
   <div class="profile-card c-A">
     <div class="count" id="cntA">0</div>
@@ -72,49 +67,43 @@ h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:.4rem;letter-s
     <div class="bar-bg"><div class="bar-fill" id="barC" style="width:0%"></div></div>
   </div>
 </div>
-
 <div class="participants">
   <div class="p-title">Participantes</div>
   <div class="p-list" id="plist"><span style="color:rgba(255,255,255,.3);font-size:13px">Esperando respuestas...</span></div>
 </div>
-
-<div class="status"><span class="pulse"></span>Actualizando cada 8 segundos</div>
+<div class="status"><span class="pulse"></span>Actualizando cada 10 segundos</div>
 
 <script>
-const URL = 'https://script.google.com/macros/s/AKfycbz13Vkkbx7PXK9m7kRmyTnlUbSwMTW6IBYyT9D6Ojsciwhncyz2LpOiULhb4XscIcp3Yg/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxymGCZNjcNDYfxDOGbg1tByKkdlkNmwcuLpnfaaD3_t8mY7u1cMlNZTWtM67wWYYTShA/exec';
 
-function update(){
-  fetch(URL + '?t=' + Date.now())
-    .then(r=>r.json())
-    .then(d=>{
-      document.getElementById('errorMsg').style.display='none';
-      const t = d.total || 0;
-      document.getElementById('total').textContent = t;
-      ['A','B','C','D'].forEach(k=>{
-        const c = d.counts[k]||0;
-        const p = t>0 ? Math.round((c/t)*100) : 0;
-        document.getElementById('cnt'+k).textContent = c;
-        document.getElementById('pct'+k).textContent = p+'%';
-        document.getElementById('bar'+k).style.width = p+'%';
-      });
-      const list = document.getElementById('plist');
-      if(d.participantes && d.participantes.length>0){
-        list.innerHTML = d.participantes.map(p=>`
-          <div class="p-chip">
-            <div class="p-dot dot-${p.perfil}"></div>
-            ${p.nombre}
-          </div>`).join('');
-      }
-    })
-    .catch(err=>{
-      const m = document.getElementById('errorMsg');
-      m.style.display='block';
-      m.textContent='Error al conectar con la hoja de datos. Verificando...';
-    });
+function handleData(d) {
+  const t = d.total || 0;
+  document.getElementById('total').textContent = t;
+  ['A','B','C','D'].forEach(k => {
+    const c = d.counts[k] || 0;
+    const p = t > 0 ? Math.round((c / t) * 100) : 0;
+    document.getElementById('cnt' + k).textContent = c;
+    document.getElementById('pct' + k).textContent = p + '%';
+    document.getElementById('bar' + k).style.width = p + '%';
+  });
+  const list = document.getElementById('plist');
+  if (d.participantes && d.participantes.length > 0) {
+    list.innerHTML = d.participantes.map(p =>
+      '<div class="p-chip"><div class="p-dot dot-' + p.perfil + '"></div>' + p.nombre + '</div>'
+    ).join('');
+  }
 }
 
-update();
-setInterval(update, 8000);
+function fetchData() {
+  const el = document.createElement('script');
+  el.src = SCRIPT_URL + '?callback=handleData&t=' + Date.now();
+  el.onerror = function() { document.getElementById('total').textContent = '—'; };
+  document.body.appendChild(el);
+  setTimeout(() => { try { document.body.removeChild(el); } catch(e){} }, 5000);
+}
+
+fetchData();
+setInterval(fetchData, 10000);
 </script>
 </body>
 </html>
