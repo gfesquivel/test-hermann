@@ -75,35 +75,34 @@ h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:.4rem}
 
 <script>
 const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxymGCZNjcNDYfxDOGbg1tByKkdlkNmwcuLpnfaaD3_t8mY7u1cMlNZTWtM67wWYYTShA/exec';
+const PROXY = 'https://api.allorigins.win/get?url=' + encodeURIComponent(SCRIPT_URL);
 
-function handleData(d) {
-  const t = d.total || 0;
-  document.getElementById('total').textContent = t;
-  ['A','B','C','D'].forEach(k => {
-    const c = d.counts[k] || 0;
-    const p = t > 0 ? Math.round((c / t) * 100) : 0;
-    document.getElementById('cnt' + k).textContent = c;
-    document.getElementById('pct' + k).textContent = p + '%';
-    document.getElementById('bar' + k).style.width = p + '%';
-  });
-  const list = document.getElementById('plist');
-  if (d.participantes && d.participantes.length > 0) {
-    list.innerHTML = d.participantes.map(p =>
-      '<div class="p-chip"><div class="p-dot dot-' + p.perfil + '"></div>' + p.nombre + '</div>'
-    ).join('');
-  }
+function update() {
+  fetch(PROXY + '&t=' + Date.now())
+    .then(r => r.json())
+    .then(wrapper => {
+      const d = JSON.parse(wrapper.contents);
+      const t = d.total || 0;
+      document.getElementById('total').textContent = t;
+      ['A','B','C','D'].forEach(k => {
+        const c = d.counts[k] || 0;
+        const p = t > 0 ? Math.round((c / t) * 100) : 0;
+        document.getElementById('cnt' + k).textContent = c;
+        document.getElementById('pct' + k).textContent = p + '%';
+        document.getElementById('bar' + k).style.width = p + '%';
+      });
+      const list = document.getElementById('plist');
+      if (d.participantes && d.participantes.length > 0) {
+        list.innerHTML = d.participantes.map(p =>
+          '<div class="p-chip"><div class="p-dot dot-' + p.perfil + '"></div>' + p.nombre + '</div>'
+        ).join('');
+      }
+    })
+    .catch(() => {});
 }
 
-function fetchData() {
-  const el = document.createElement('script');
-  el.src = SCRIPT_URL + '?callback=handleData&t=' + Date.now();
-  el.onerror = function() { document.getElementById('total').textContent = '—'; };
-  document.body.appendChild(el);
-  setTimeout(() => { try { document.body.removeChild(el); } catch(e){} }, 5000);
-}
-
-fetchData();
-setInterval(fetchData, 10000);
+update();
+setInterval(update, 10000);
 </script>
 </body>
 </html>
