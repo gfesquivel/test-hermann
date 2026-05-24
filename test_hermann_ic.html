@@ -1,0 +1,259 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Test de Hermann — Ingeniería Comercial</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#F7F9FC;color:#1A2A3A;min-height:100vh}
+.container{max-width:640px;margin:0 auto;padding:2rem 1.25rem}
+.header{text-align:center;margin-bottom:2rem}
+.header h1{font-size:22px;font-weight:600;color:#0C2D5E;margin-bottom:.4rem}
+.header p{font-size:14px;color:#6B7C93;line-height:1.5}
+.card{background:#fff;border-radius:16px;padding:1.75rem;box-shadow:0 1px 4px rgba(0,0,0,.08);margin-bottom:1.5rem}
+.progress-wrap{margin-bottom:1.75rem}
+.progress-top{display:flex;justify-content:space-between;font-size:12px;color:#6B7C93;margin-bottom:.4rem}
+.progress-bar{height:5px;background:#E8EDF4;border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:#378ADD;border-radius:3px;transition:width .3s}
+.q-text{font-size:17px;font-weight:500;color:#1A2A3A;line-height:1.5;margin-bottom:1.25rem}
+.options{display:flex;flex-direction:column;gap:10px}
+.opt{display:flex;align-items:flex-start;gap:12px;padding:13px 15px;border:1.5px solid #E8EDF4;border-radius:12px;cursor:pointer;transition:all .15s;background:#fff}
+.opt:hover{border-color:#B5D4F4;background:#F5F9FF}
+.opt.selected{border-color:#378ADD;background:#EBF4FD}
+.opt-letter{width:26px;height:26px;border-radius:50%;border:1.5px solid #D6DEE8;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:600;color:#8FA3B8;flex-shrink:0;margin-top:1px;transition:all .15s}
+.opt.selected .opt-letter{background:#378ADD;border-color:#378ADD;color:#fff}
+.opt-text{font-size:14px;color:#1A2A3A;line-height:1.5}
+.nav{display:flex;justify-content:space-between;align-items:center;margin-top:1.5rem}
+.btn{padding:10px 22px;border:1.5px solid #D6DEE8;border-radius:10px;background:#fff;color:#1A2A3A;font-size:14px;font-weight:500;cursor:pointer;transition:all .15s}
+.btn:hover{background:#F2F5F8}
+.btn.primary{background:#0C2D5E;border-color:#0C2D5E;color:#fff}
+.btn.primary:hover{background:#1A4A82}
+.btn:disabled{opacity:.35;cursor:default}
+.hint{font-size:13px;color:#8FA3B8}
+
+/* Nombre step */
+.name-step{text-align:center}
+.name-step h2{font-size:20px;font-weight:600;color:#0C2D5E;margin-bottom:.5rem}
+.name-step p{font-size:14px;color:#6B7C93;margin-bottom:1.5rem;line-height:1.5}
+.name-input{width:100%;padding:12px 16px;border:1.5px solid #D6DEE8;border-radius:10px;font-size:15px;outline:none;transition:border .15s}
+.name-input:focus{border-color:#378ADD}
+.name-hint{font-size:12px;color:#8FA3B8;margin-top:.5rem;margin-bottom:1.5rem}
+
+/* Result */
+.result-header{padding:1.5rem;border-radius:12px;margin-bottom:1.5rem;text-align:center}
+.result-header h2{font-size:22px;font-weight:700;margin-bottom:.4rem}
+.result-header p{font-size:14px;line-height:1.6}
+.rh-A{background:#EBF4FD;border:1.5px solid #B5D4F4} .rh-A h2{color:#0C447C} .rh-A p{color:#185FA5}
+.rh-B{background:#EAF3DE;border:1.5px solid #C0DD97} .rh-B h2{color:#27500A} .rh-B p{color:#3B6D11}
+.rh-C{background:#FAEEDA;border:1.5px solid #FAC775} .rh-C h2{color:#633806} .rh-C p{color:#854F0B}
+.rh-D{background:#EEEDFE;border:1.5px solid #CECBF6} .rh-D h2{color:#3C3489} .rh-D p{color:#534AB7}
+.bars{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
+.bar-row{display:flex;align-items:center;gap:10px}
+.bar-label{font-size:13px;font-weight:600;width:90px;color:#1A2A3A}
+.bar-track{flex:1;height:22px;background:#F2F5F8;border-radius:6px;overflow:hidden}
+.bar-fill{height:100%;border-radius:6px;transition:width .6s ease;display:flex;align-items:center;padding-left:8px}
+.bar-fill span{font-size:12px;font-weight:600;color:#fff}
+.bar-A{background:#378ADD} .bar-B{background:#639922} .bar-C{background:#BA7517} .bar-D{background:#7F77DD}
+.section-title{font-size:13px;font-weight:700;color:#0C2D5E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
+.tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1.25rem}
+.tag{font-size:12px;padding:5px 11px;border-radius:8px;background:#F2F5F8;color:#3A4A5C;border:1px solid #E0E6EE}
+.roles{display:flex;flex-direction:column;gap:7px;margin-bottom:1.25rem}
+.role{display:flex;align-items:center;gap:8px;font-size:13px;color:#1A2A3A}
+.rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
+.tip{padding:13px 15px;border-radius:10px;background:#F7F9FC;border-left:3px solid #378ADD;margin-bottom:1rem}
+.tip p{font-size:13px;color:#3A4A5C;line-height:1.6}
+.tip.purple{border-left-color:#7F77DD}
+.sent-msg{text-align:center;padding:.75rem;background:#EAF3DE;border-radius:10px;font-size:13px;color:#3B6D11;margin-bottom:1rem}
+.restart{text-align:center;padding-top:.5rem}
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header">
+  <h1>Test de Hermann</h1>
+  <p>Dominancia cerebral aplicada al liderazgo y la gestión<br>Ingeniería Comercial · 5° año · U. de los Andes</p>
+</div>
+
+<div class="card" id="nameCard">
+  <div class="name-step">
+    <h2>Bienvenido/a</h2>
+    <p>15 preguntas sobre situaciones de trabajo y estudio. Elige la opción que más te representa, no la que crees que es "correcta". No hay respuestas buenas ni malas.</p>
+    <input class="name-input" id="nameInput" type="text" placeholder="Tu nombre (ej: Ignacio M.)" maxlength="40" />
+    <div class="name-hint">Solo para identificar tu resultado — no se comparte con otros alumnos</div>
+    <button class="btn primary" onclick="startTest()" style="width:100%">Comenzar el test →</button>
+  </div>
+</div>
+
+<div class="card" id="quizCard" style="display:none">
+  <div class="progress-wrap">
+    <div class="progress-top">
+      <span id="qcount">Pregunta 1 de 15</span>
+      <span id="qanswered">0 respondidas</span>
+    </div>
+    <div class="progress-bar"><div class="progress-fill" id="pbar" style="width:0%"></div></div>
+  </div>
+  <div class="q-text" id="qtext"></div>
+  <div class="options" id="opts"></div>
+  <div class="nav">
+    <button class="btn" id="btnPrev" onclick="prev()" disabled>← Anterior</button>
+    <span class="hint" id="hint">Selecciona una opción</span>
+    <button class="btn primary" id="btnNext" onclick="next()" disabled>Siguiente →</button>
+  </div>
+</div>
+
+<div id="resultCard" style="display:none"></div>
+</div>
+
+<script>
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbxUQRg_VsS9vCRPhmvBRY5OsiUs6pj752TGa93EQ4LxPfRKYfObaPIikAa6952VcnultQ/exec';
+
+const Qs = [
+{t:"Estás en un grupo para un caso de negocios. ¿Cuál es tu rol natural?",opts:[{t:"Busco y analizo los datos para sustentar la decisión del grupo",q:"A"},{t:"Organizo el trabajo, defino tiempos y coordino al equipo",q:"B"},{t:"Me aseguro de que todos participen y el equipo funcione bien",q:"C"},{t:"Propongo una forma de enfocar el caso que nadie había considerado",q:"D"}]},
+{t:"Tu profesor te pide liderar la presentación final del ramo. Lo primero que haces es:",opts:[{t:"Revisar toda la información disponible y construir el argumento central con evidencia",q:"A"},{t:"Armar un plan con slides, tiempos y responsabilidades claras",q:"B"},{t:"Reunir al grupo para escuchar ideas y asegurarte de que estén alineados",q:"C"},{t:"Pensar en cómo hacer una presentación que sea realmente diferente y memorable",q:"D"}]},
+{t:"¿Cuál describe mejor tu actitud frente a los plazos de entrega?",opts:[{t:"Los tomo como referencia: si el trabajo está bien hecho, vale la pena el tiempo extra",q:"A"},{t:"Los anoto desde el primer día y trabajo en función de ellos sistemáticamente",q:"B"},{t:"Los manejo bien cuando el equipo está coordinado y motivado",q:"C"},{t:"A veces me atraso porque voy refinando la idea hasta que me convence de verdad",q:"D"}]},
+{t:"En una empresa donde estás haciendo práctica, detectas un proceso ineficiente. ¿Qué haces?",opts:[{t:"Analizo el proceso con datos, identifico el cuello de botella y propongo una solución técnica",q:"A"},{t:"Documento el problema, propongo un procedimiento mejorado y lo presento formalmente",q:"B"},{t:"Converso con las personas involucradas para entender por qué hacen las cosas así antes de proponer algo",q:"C"},{t:"Propongo rediseñar completamente el proceso con un enfoque distinto",q:"D"}]},
+{t:"¿Cómo describes tu forma de estudiar para un examen difícil?",opts:[{t:"Entiendo la lógica de fondo: si entiendo el concepto, puedo resolver cualquier variante",q:"A"},{t:"Estudio con esquemas, resúmenes organizados y repaso sistemático",q:"B"},{t:"Estudio mejor en grupo: explicar y escuchar a otros me ayuda a aprender",q:"C"},{t:"Busco el patrón general y me quedo con las ideas grandes, no con los detalles",q:"D"}]},
+{t:"Imagina que en tu primer trabajo tienes que convencer a tu jefe de implementar una idea tuya. ¿Cómo lo haces?",opts:[{t:"Con un análisis sólido: datos, benchmarks y proyecciones que respalden la idea",q:"A"},{t:"Con un plan detallado que muestre cómo se implementaría paso a paso y qué recursos requiere",q:"B"},{t:"Entendiendo primero los objetivos de mi jefe y conectando mi idea con lo que le importa a él",q:"C"},{t:"Con una visión inspiradora de lo que podría lograrse: que le genere entusiasmo, no solo convencimiento racional",q:"D"}]},
+{t:"En un trabajo en equipo donde hay conflicto entre dos personas del grupo, tú:",opts:[{t:"Propones que el grupo se enfoque en los hechos y deje las emociones fuera de la decisión",q:"A"},{t:"Sugieres seguir el proceso acordado al inicio y no desviarse de los objetivos",q:"B"},{t:"Hablas por separado con cada uno para entender su posición y luego facilitas un acuerdo",q:"C"},{t:"Replanteas el problema desde una perspectiva nueva que hace que el conflicto pierda relevancia",q:"D"}]},
+{t:"¿Qué tipo de asignatura disfrutas más en la carrera?",opts:[{t:"Finanzas, estadística, econometría: donde hay rigor técnico y análisis cuantitativo",q:"A"},{t:"Gestión de operaciones, control de gestión, administración: donde hay orden y sistemas",q:"B"},{t:"Liderazgo, comportamiento organizacional, marketing: donde importan las personas",q:"C"},{t:"Estrategia, innovación, emprendimiento: donde hay visión y pensamiento de largo plazo",q:"D"}]},
+{t:"¿Cuál de estas frases se parece más a cómo piensas?",opts:[{t:"'Una buena decisión se basa en datos, no en intuiciones'",q:"A"},{t:"'Lo que no se mide ni se planifica, no se logra'",q:"B"},{t:"'El mejor resultado lo produce un equipo que confía entre sí'",q:"C"},{t:"'Las reglas son puntos de partida, no límites definitivos'",q:"D"}]},
+{t:"¿Qué tipo de líder quieres ser cuando seas profesional?",opts:[{t:"El que toma las decisiones más difíciles con mayor claridad y rigor técnico",q:"A"},{t:"El que ejecuta bien, cumple los compromisos y da certeza al equipo",q:"B"},{t:"El que desarrolla a las personas y crea equipos donde la gente da lo mejor",q:"C"},{t:"El que ve lo que otros no ven y lleva a la organización hacia nuevas oportunidades",q:"D"}]},
+{t:"En una entrevista de trabajo, ¿cuál es tu mayor fortaleza real (no la que dices siempre)?",opts:[{t:"Analizo problemas complejos mejor que la mayoría de mis pares",q:"A"},{t:"Soy muy ordenado/a, confiable y cumplo con lo que me comprometo",q:"B"},{t:"Me relaciono bien con todos y genero confianza rápidamente",q:"C"},{t:"Traigo ideas originales y una perspectiva estratégica diferente",q:"D"}]},
+{t:"Cuando trabajas en un proyecto con un plazo muy ajustado, ¿qué es lo primero que haces?",opts:[{t:"Evalúo qué es lo crítico del proyecto y elimino todo lo que no agrega valor real",q:"A"},{t:"Descompongo el trabajo en tareas, las priorizo y asigno tiempos a cada una",q:"B"},{t:"Coordino al equipo para asegurarme de que todos saben qué tienen que hacer y pueden hacerlo",q:"C"},{t:"Busco la forma más eficiente de llegar al resultado, aunque implique un enfoque completamente distinto",q:"D"}]},
+{t:"Un amigo te pide consejo porque tiene un problema serio con su jefe. Tú:",opts:[{t:"Le ayudas a analizar la situación objetivamente y a identificar la solución más racional",q:"A"},{t:"Le propones un plan concreto: qué decir, cuándo y cómo manejarlo",q:"B"},{t:"Lo escuchas primero sin interrumpir, validas cómo se siente y luego lo ayudas",q:"C"},{t:"Le propones ver el problema desde otro ángulo que tal vez no había considerado",q:"D"}]},
+{t:"¿Cuál de estas carreras paralelas te genera más curiosidad?",opts:[{t:"Finanzas corporativas, inversiones, consultoría estratégica de alto nivel",q:"A"},{t:"Gerencia de operaciones, auditoría, controller financiero",q:"B"},{t:"Gestión de personas, desarrollo organizacional, liderazgo comercial",q:"C"},{t:"Emprendimiento, innovación corporativa, estrategia en startups",q:"D"}]},
+{t:"Al terminar esta carrera, ¿qué quieres que digan de ti quienes trabajaron contigo?",opts:[{t:"'Es la persona más analítica y técnicamente sólida que he conocido'",q:"A"},{t:"'Siempre cumplió, fue confiable y mantuvo todo bajo control'",q:"B"},{t:"'Hacía que el equipo funcionara bien y sacaba lo mejor de cada uno'",q:"C"},{t:"'Veía oportunidades donde todos veían problemas y se animaba a ir por ellas'",q:"D"}]}
+];
+
+const PROFILES = {
+  A:{name:"Cuadrante A · Analítico",short:"Analítico",desc:"Tu motor es el razonamiento lógico y el rigor técnico. En entornos laborales destacas por tu capacidad de procesar información compleja y tomar decisiones basadas en evidencia. Eres el tipo de profesional que los equipos buscan cuando el problema requiere un análisis profundo.",strengths:["Pensamiento crítico y cuantitativo","Capacidad técnica y rigor analítico","Toma de decisiones basada en datos","Resolución de problemas complejos"],roles:["Analista financiero o de inversiones","Consultor estratégico","Data analyst / Controller","Banca de inversión","Consultoría en Big 4"],blind:"Puedes subestimar el impacto emocional de tus decisiones en las personas. La solución técnicamente perfecta a veces fracasa si no considera a quienes la tienen que ejecutar.",tip:"Complementa con perfiles C (relacionales) para comunicar mejor tus análisis y con perfiles B para aterrizar tus ideas en planes ejecutables.",color:"A"},
+  B:{name:"Cuadrante B · Organizador",short:"Organizador",desc:"Tu fuerza está en la ejecución sistemática y la planificación. Conviertes ideas en planes reales, cumples los compromisos y das certeza al equipo. En el mundo profesional, los perfiles B son los que realmente hacen que las cosas pasen.",strengths:["Planificación y gestión de proyectos","Atención al detalle y seguimiento","Cumplimiento de plazos y compromisos","Creación de procesos y sistemas"],roles:["Gerente de operaciones o proyectos","Controller o gerente de administración","Auditor / Gerente de finanzas","Supply chain manager","Jefe de planificación estratégica"],blind:"Puedes resistirte al cambio en entornos que requieren agilidad. La estructura que te da fortaleza puede convertirse en rigidez cuando el contexto cambia rápido.",tip:"Trabaja con perfiles D que te desafíen a innovar y con perfiles A que den sustento técnico a tus planes de acción.",color:"B"},
+  C:{name:"Cuadrante C · Relacional",short:"Relacional",desc:"Las personas son tu motor. Tienes alta inteligencia emocional, generas confianza con facilidad y sabes cómo activar equipos. En el trabajo eres quien detecta los problemas humanos antes de que exploten y quien logra que equipos diversos funcionen bien juntos.",strengths:["Inteligencia emocional y empatía","Liderazgo de equipos y personas","Comunicación y escucha activa","Resolución de conflictos"],roles:["Gerente comercial o de cuentas","Líder de equipos en consultoría","RRHH y desarrollo organizacional","Marketing y experiencia de cliente","Gerente general con foco en personas"],blind:"A veces priorizas el consenso sobre la decisión correcta o evitas conflictos necesarios. No todos los problemas se resuelven hablando.",tip:"Apóyate en perfiles A para la toma de decisiones difíciles basadas en datos y en perfiles B para estructurar los planes del equipo.",color:"C"},
+  D:{name:"Cuadrante D · Estratega",short:"Estratega",desc:"Ves lo que otros no ven. Tienes capacidad para pensar en sistemas, conectar ideas aparentemente sin relación y proponer enfoques originales. Destacas en contextos de incertidumbre, cuando hay que reinventar modelos o explorar nuevos territorios.",strengths:["Pensamiento estratégico y sistémico","Creatividad e innovación","Tolerancia a la ambigüedad","Inspirar y generar entusiasmo"],roles:["Director de estrategia o innovación","Emprendedor / Fundador de startup","Consultor de transformación","Marketing estratégico y branding","Gerente general en industrias dinámicas"],blind:"Puedes frustrarte con los detalles de ejecución y generar frustración en equipos que necesitan instrucciones concretas, no más ideas.",tip:"Complementa tu visión con perfiles B que ejecuten tus planes con rigor y perfiles A que pongan a prueba tus ideas con datos.",color:"D"}
+};
+
+const COLORS = {A:'#378ADD',B:'#639922',C:'#BA7517',D:'#7F77DD'};
+const NAMES = {A:'Analítico',B:'Organizador',C:'Relacional',D:'Estratega'};
+
+let answers = new Array(15).fill(null);
+let cur = 0;
+let userName = '';
+
+function startTest(){
+  const n = document.getElementById('nameInput').value.trim();
+  if(!n){document.getElementById('nameInput').focus();return;}
+  userName = n;
+  document.getElementById('nameCard').style.display='none';
+  document.getElementById('quizCard').style.display='block';
+  render();
+}
+
+function render(){
+  const q = Qs[cur];
+  document.getElementById('qcount').textContent = `Pregunta ${cur+1} de 15`;
+  document.getElementById('pbar').style.width = `${((cur+1)/15)*100}%`;
+  const ans = answers.filter(a=>a!==null).length;
+  document.getElementById('qanswered').textContent = `${ans} respondidas`;
+  document.getElementById('qtext').textContent = q.t;
+  const opts = document.getElementById('opts');
+  opts.innerHTML = '';
+  const letters = ['A','B','C','D'];
+  q.opts.forEach((o,i)=>{
+    const d = document.createElement('div');
+    d.className = 'opt' + (answers[cur]===o.q?' selected':'');
+    d.innerHTML = `<div class="opt-letter">${letters[i]}</div><div class="opt-text">${o.t}</div>`;
+    d.onclick = ()=>select(o.q);
+    opts.appendChild(d);
+  });
+  document.getElementById('btnPrev').disabled = cur===0;
+  document.getElementById('btnNext').disabled = answers[cur]===null;
+  const isLast = cur===14;
+  document.getElementById('btnNext').textContent = isLast ? 'Ver mi resultado →' : 'Siguiente →';
+  document.getElementById('hint').textContent = answers[cur] ? `${ans} de 15 respondidas` : 'Selecciona una opción';
+}
+
+function select(q){answers[cur]=q;render();}
+function prev(){if(cur>0){cur--;render();}}
+function next(){
+  if(answers[cur]===null)return;
+  if(cur<14){cur++;render();}
+  else showResult();
+}
+
+function showResult(){
+  const scores={A:0,B:0,C:0,D:0};
+  answers.forEach(a=>{if(a)scores[a]++;});
+  const dominant = Object.entries(scores).sort((a,b)=>b[1]-a[1])[0][0];
+  const p = PROFILES[dominant];
+  const total = 15;
+  const pct = k => Math.round((scores[k]/total)*100);
+
+  document.getElementById('quizCard').style.display='none';
+  const rc = document.getElementById('resultCard');
+  rc.style.display='block';
+
+  rc.innerHTML = `
+<div class="card">
+  <div class="result-header rh-${p.color}">
+    <h2>${p.name}</h2>
+    <p>${p.desc}</p>
+  </div>
+
+  <div class="section-title">Distribución de tu perfil</div>
+  <div class="bars" style="margin-bottom:1.5rem">
+    ${['A','B','C','D'].map(k=>`
+    <div class="bar-row">
+      <div class="bar-label">${NAMES[k]}</div>
+      <div class="bar-track"><div class="bar-fill bar-${k}" style="width:${pct(k)}%"><span>${pct(k)}%</span></div></div>
+    </div>`).join('')}
+  </div>
+
+  <div class="section-title">Tus fortalezas</div>
+  <div class="tags" style="margin-bottom:1.5rem">${p.strengths.map(s=>`<span class="tag">${s}</span>`).join('')}</div>
+
+  <div class="section-title">Dónde sueles destacar</div>
+  <div class="roles" style="margin-bottom:1.5rem">${p.roles.map(r=>`<div class="role"><div class="rdot" style="background:${COLORS[p.color]}"></div>${r}</div>`).join('')}</div>
+
+  <div class="section-title">Punto ciego a trabajar</div>
+  <div class="tip" style="margin-bottom:1rem"><p>${p.blind}</p></div>
+
+  <div class="section-title">Cómo complementarte</div>
+  <div class="tip purple" style="margin-bottom:1.5rem"><p>${p.tip}</p></div>
+
+  <div id="sentMsg" class="sent-msg" style="display:none">✓ Resultado enviado — aparecerás en el resumen de la clase</div>
+
+  <div class="restart"><button class="btn" onclick="restart()">← Volver a empezar</button></div>
+</div>`;
+
+  sendResult(scores, dominant);
+}
+
+function sendResult(scores, perfil){
+  fetch(SCRIPT_URL, {
+    method:'POST',
+    body: JSON.stringify({nombre: userName, perfil, scores}),
+    headers:{'Content-Type':'application/json'}
+  })
+  .then(r=>r.json())
+  .then(d=>{
+    if(d.ok){
+      const m = document.getElementById('sentMsg');
+      if(m) m.style.display='block';
+    }
+  })
+  .catch(()=>{});
+}
+
+function restart(){
+  answers = new Array(15).fill(null);
+  cur = 0;
+  document.getElementById('resultCard').style.display='none';
+  document.getElementById('nameCard').style.display='block';
+  document.getElementById('nameInput').value='';
+}
+
+document.getElementById('nameInput').addEventListener('keydown', e=>{if(e.key==='Enter')startTest();});
+</script>
+</body>
+</html>
