@@ -21,14 +21,14 @@ h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:.4rem;letter-s
 .profile-card .bar-fill{height:100%;border-radius:4px;transition:width .8s ease}
 .c-A .count{color:#64B5F6} .c-A .name{color:#B3D9FF} .c-A .bar-fill{background:#378ADD}
 .c-B .count{color:#81C784} .c-B .name{color:#C8E6C9} .c-B .bar-fill{background:#639922}
-.c-C .count{color:#FFB74D} .c-C .name{color:#FFE0B2} .c-C .bar-fill{background:#BA7517}
-.c-D .count{color:#CE93D8} .c-D .name{color:#E1BEE7} .c-D .bar-fill{background:#7F77DD}
+.c-C .count{color:#EF9A9A} .c-C .name{color:#FFCDD2} .c-C .bar-fill{background:#E53935}
+.c-D .count{color:#FFE082} .c-D .name{color:#FFF9C4} .c-D .bar-fill{background:#F5A623}
 .participants{max-width:800px;margin:0 auto}
 .p-title{font-size:13px;font-weight:600;color:#7AACCC;letter-spacing:.06em;text-transform:uppercase;margin-bottom:1rem}
 .p-list{display:flex;flex-wrap:wrap;gap:8px}
 .p-chip{font-size:13px;padding:5px 12px;border-radius:20px;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.12);display:flex;align-items:center;gap:6px}
 .p-dot{width:8px;height:8px;border-radius:50%;flex-shrink:0}
-.dot-A{background:#378ADD} .dot-B{background:#639922} .dot-C{background:#BA7517} .dot-D{background:#7F77DD}
+.dot-A{background:#378ADD} .dot-B{background:#639922} .dot-C{background:#E53935} .dot-D{background:#F5A623}
 .status{text-align:center;font-size:13px;color:#7AACCC;margin-top:2rem}
 .pulse{display:inline-block;width:8px;height:8px;border-radius:50%;background:#4CAF50;margin-right:6px;animation:pulse 1.5s infinite}
 @keyframes pulse{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.5;transform:scale(1.3)}}
@@ -81,7 +81,7 @@ h1{font-size:28px;font-weight:700;text-align:center;margin-bottom:.4rem;letter-s
 <div class="status"><span class="pulse"></span>Actualizando cada 8 segundos</div>
 
 <script>
-const URL = 'https://script.google.com/a/macros/miuandes.cl/s/AKfycbwA8egyeswu3lhiZZ5iCHv1psDZW3QtF6xdwcfm9VFnmHcabN2ZRpNcQDCemswplVB1/exec';
+const URL = 'https://script.google.com/macros/s/AKfycbz13Vkkbx7PXK9m7kRmyTnlUbSwMTW6IBYyT9D6Ojsciwhncyz2LpOiULhb4XscIcp3Yg/exec';
 
 function update(){
   fetch(URL + '?t=' + Date.now())

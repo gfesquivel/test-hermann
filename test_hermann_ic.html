@@ -46,15 +46,15 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .result-header p{font-size:14px;line-height:1.6}
 .rh-A{background:#EBF4FD;border:1.5px solid #B5D4F4} .rh-A h2{color:#0C447C} .rh-A p{color:#185FA5}
 .rh-B{background:#EAF3DE;border:1.5px solid #C0DD97} .rh-B h2{color:#27500A} .rh-B p{color:#3B6D11}
-.rh-C{background:#FAEEDA;border:1.5px solid #FAC775} .rh-C h2{color:#633806} .rh-C p{color:#854F0B}
-.rh-D{background:#EEEDFE;border:1.5px solid #CECBF6} .rh-D h2{color:#3C3489} .rh-D p{color:#534AB7}
+.rh-C{background:#FFEBEE;border:1.5px solid #FFCDD2} .rh-C h2{color:#B71C1C} .rh-C p{color:#C62828}
+.rh-D{background:#FFFDE7;border:1.5px solid #FFF176} .rh-D h2{color:#F57F17} .rh-D p{color:#F9A825}
 .bars{display:flex;flex-direction:column;gap:10px;margin-bottom:1.5rem}
 .bar-row{display:flex;align-items:center;gap:10px}
 .bar-label{font-size:13px;font-weight:600;width:90px;color:#1A2A3A}
 .bar-track{flex:1;height:22px;background:#F2F5F8;border-radius:6px;overflow:hidden}
 .bar-fill{height:100%;border-radius:6px;transition:width .6s ease;display:flex;align-items:center;padding-left:8px}
 .bar-fill span{font-size:12px;font-weight:600;color:#fff}
-.bar-A{background:#378ADD} .bar-B{background:#639922} .bar-C{background:#BA7517} .bar-D{background:#7F77DD}
+.bar-A{background:#378ADD} .bar-B{background:#639922} .bar-C{background:#E53935} .bar-D{background:#F5A623}
 .section-title{font-size:13px;font-weight:700;color:#0C2D5E;text-transform:uppercase;letter-spacing:.06em;margin-bottom:.75rem}
 .tags{display:flex;flex-wrap:wrap;gap:7px;margin-bottom:1.25rem}
 .tag{font-size:12px;padding:5px 11px;border-radius:8px;background:#F2F5F8;color:#3A4A5C;border:1px solid #E0E6EE}
@@ -63,7 +63,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 .rdot{width:7px;height:7px;border-radius:50%;flex-shrink:0}
 .tip{padding:13px 15px;border-radius:10px;background:#F7F9FC;border-left:3px solid #378ADD;margin-bottom:1rem}
 .tip p{font-size:13px;color:#3A4A5C;line-height:1.6}
-.tip.purple{border-left-color:#7F77DD}
+.tip.purple{border-left-color:#F5A623}
 .sent-msg{text-align:center;padding:.75rem;background:#EAF3DE;border-radius:10px;font-size:13px;color:#3B6D11;margin-bottom:1rem}
 .restart{text-align:center;padding-top:.5rem}
 </style>
@@ -106,7 +106,7 @@ body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;backgrou
 </div>
 
 <script>
-const SCRIPT_URL = 'https://script.google.com/a/macros/miuandes.cl/s/AKfycbwA8egyeswu3lhiZZ5iCHv1psDZW3QtF6xdwcfm9VFnmHcabN2ZRpNcQDCemswplVB1/exec';
+const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbz13Vkkbx7PXK9m7kRmyTnlUbSwMTW6IBYyT9D6Ojsciwhncyz2LpOiULhb4XscIcp3Yg/exec';
 
 const Qs = [
 {t:"Estás en un grupo para un caso de negocios. ¿Cuál es tu rol natural?",opts:[{t:"Busco y analizo los datos para sustentar la decisión del grupo",q:"A"},{t:"Organizo el trabajo, defino tiempos y coordino al equipo",q:"B"},{t:"Me aseguro de que todos participen y el equipo funcione bien",q:"C"},{t:"Propongo una forma de enfocar el caso que nadie había considerado",q:"D"}]},
@@ -133,7 +133,7 @@ const PROFILES = {
   D:{name:"Cuadrante D · Estratega",short:"Estratega",desc:"Ves lo que otros no ven. Tienes capacidad para pensar en sistemas, conectar ideas aparentemente sin relación y proponer enfoques originales. Destacas en contextos de incertidumbre, cuando hay que reinventar modelos o explorar nuevos territorios.",strengths:["Pensamiento estratégico y sistémico","Creatividad e innovación","Tolerancia a la ambigüedad","Inspirar y generar entusiasmo"],roles:["Director de estrategia o innovación","Emprendedor / Fundador de startup","Consultor de transformación","Marketing estratégico y branding","Gerente general en industrias dinámicas"],blind:"Puedes frustrarte con los detalles de ejecución y generar frustración en equipos que necesitan instrucciones concretas, no más ideas.",tip:"Complementa tu visión con perfiles B que ejecuten tus planes con rigor y perfiles A que pongan a prueba tus ideas con datos.",color:"D"}
 };
 
-const COLORS = {A:'#378ADD',B:'#639922',C:'#BA7517',D:'#7F77DD'};
+const COLORS = {A:'#378ADD',B:'#639922',C:'#E53935',D:'#F5A623'};
 const NAMES = {A:'Analítico',B:'Organizador',C:'Relacional',D:'Estratega'};
 
 let answers = new Array(15).fill(null);
