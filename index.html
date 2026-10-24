@@ -1,0 +1,463 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#101828">
+<title>Test de Herrmann · ¿Cómo piensas?</title>
+<style>
+  :root {
+    --bg: #eef1f7; --card: #ffffff; --ink: #101828; --ink-2: #475467; --ink-3: #98a2b3;
+    --line: #e4e7ec; --brand: #1b2a4a; --brand-2: #2a6fd0;
+    --A: #2a6fd0; --B: #237010; --C: #d2366f; --D: #b07a00;
+    --A-soft: #e3edfb; --B-soft: #e3f3df; --C-soft: #fbe3ec; --D-soft: #fbefd2;
+    --radius: 18px; --shadow: 0 10px 30px rgba(16, 24, 40, .08);
+  }
+  * { box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
+  html, body { margin: 0; padding: 0; }
+  body {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+    background: var(--bg); color: var(--ink); line-height: 1.45; min-height: 100vh;
+    background-image: radial-gradient(1000px 500px at 50% -10%, #dfe8fb 0%, transparent 60%);
+  }
+  #app { max-width: 560px; margin: 0 auto; padding: 16px 16px calc(28px + env(safe-area-inset-bottom)); }
+  .pantalla { display: none; animation: entrar .35s ease-out; }
+  .pantalla.activa { display: block; }
+  @keyframes entrar { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+  .card { background: var(--card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 22px 20px; margin-bottom: 14px; }
+  h1 { font-size: 1.7rem; line-height: 1.15; margin: 8px 0 6px; letter-spacing: -.02em; }
+  h2 { font-size: 1.25rem; margin: 0 0 8px; letter-spacing: -.01em; }
+  h3 { font-size: .8rem; text-transform: uppercase; letter-spacing: .08em; color: var(--ink-3); margin: 18px 0 8px; }
+  p { margin: 0 0 10px; color: var(--ink-2); }
+  .mini { font-size: .85rem; color: var(--ink-3); }
+  .chip { display: inline-block; background: #f2f4f7; color: var(--ink-2); border-radius: 999px; padding: 5px 11px; font-size: .82rem; margin: 3px 4px 3px 0; }
+  .btn { display: block; width: 100%; border: 0; border-radius: 14px; padding: 16px 18px; font-size: 1.05rem; font-weight: 700; cursor: pointer; background: var(--brand); color: #fff; transition: transform .08s, filter .15s; }
+  .btn:active { transform: scale(.985); }
+  .btn:disabled { opacity: .45; cursor: not-allowed; }
+  .btn.sec { background: #f2f4f7; color: var(--ink); font-weight: 600; }
+  .btn.ghost { background: transparent; color: var(--ink-2); box-shadow: none; padding: 10px; font-weight: 600; }
+  .fila { display: flex; gap: 10px; align-items: center; }
+  label { display: block; font-weight: 600; font-size: .9rem; margin: 12px 0 6px; }
+  input[type=text] { width: 100%; font: inherit; font-size: 1.05rem; padding: 13px 14px; border: 1.5px solid var(--line); border-radius: 12px; background: #fff; color: var(--ink); outline: none; }
+  input[type=text]:focus { border-color: var(--brand-2); box-shadow: 0 0 0 4px rgba(42, 111, 208, .12); }
+  .error { color: #b42318; font-size: .85rem; margin-top: 6px; min-height: 1.2em; }
+  .cabecera { display: flex; align-items: center; gap: 12px; margin: 4px 0 14px; }
+  .cabecera .logo { font-size: 2rem; }
+  .cabecera .curso { font-size: .78rem; color: var(--ink-3); line-height: 1.3; }
+  .cabecera .curso b { display: block; color: var(--ink-2); font-size: .85rem; }
+  .avatares { display: grid; grid-template-columns: repeat(8, 1fr); gap: 6px; margin-top: 6px; }
+  .avatares button { font-size: 1.5rem; padding: 6px 0; border: 2px solid transparent; border-radius: 12px; background: #f2f4f7; cursor: pointer; line-height: 1.4; }
+  .avatares button.sel { border-color: var(--brand-2); background: var(--A-soft); transform: scale(1.08); }
+  /* Progreso */
+  .barra { height: 8px; background: #e4e7ec; border-radius: 999px; overflow: hidden; margin: 8px 0 4px; }
+  .barra > div { height: 100%; width: 0; background: linear-gradient(90deg, var(--A), var(--C)); border-radius: 999px; transition: width .35s ease; }
+  .meta { display: flex; justify-content: space-between; font-size: .82rem; color: var(--ink-3); }
+  .tema { font-size: .78rem; text-transform: uppercase; letter-spacing: .08em; color: var(--brand-2); font-weight: 700; margin: 14px 0 4px; }
+  .pregunta { font-size: 1.22rem; font-weight: 700; line-height: 1.3; margin: 0 0 16px; letter-spacing: -.01em; }
+  .opcion { display: flex; gap: 12px; align-items: flex-start; width: 100%; text-align: left; background: #fff; border: 2px solid var(--line); border-radius: 14px; padding: 14px 14px; margin-bottom: 10px; font: inherit; font-size: 1rem; color: var(--ink); cursor: pointer; transition: border-color .15s, background .15s, transform .08s; }
+  .opcion:active { transform: scale(.99); }
+  .opcion .n { flex: none; width: 28px; height: 28px; border-radius: 50%; background: #f2f4f7; color: var(--ink-2); font-weight: 700; font-size: .85rem; display: grid; place-items: center; margin-top: 1px; }
+  .opcion.sel { border-color: var(--brand-2); background: var(--A-soft); }
+  .opcion.sel .n { background: var(--brand-2); color: #fff; }
+  .nav { display: flex; justify-content: space-between; align-items: center; margin-top: 6px; }
+  .nav button { background: none; border: 0; font: inherit; color: var(--ink-2); font-weight: 600; padding: 10px; cursor: pointer; }
+  .nav button:disabled { opacity: .35; }
+  /* Calculando */
+  .calc { text-align: center; padding: 40px 10px; }
+  .cerebro { font-size: 4rem; display: inline-block; animation: latir 1s ease-in-out infinite; filter: drop-shadow(0 8px 16px rgba(42,111,208,.25)); }
+  @keyframes latir { 0%, 100% { transform: scale(1) rotate(-4deg); } 50% { transform: scale(1.12) rotate(4deg); } }
+  .puntos { display: flex; gap: 8px; justify-content: center; margin: 18px 0; }
+  .puntos span { width: 14px; height: 14px; border-radius: 50%; animation: salto 1.2s infinite; }
+  .puntos span:nth-child(1) { background: var(--A); } .puntos span:nth-child(2) { background: var(--B); animation-delay: .15s; }
+  .puntos span:nth-child(3) { background: var(--C); animation-delay: .3s; } .puntos span:nth-child(4) { background: var(--D); animation-delay: .45s; }
+  @keyframes salto { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-12px); } }
+  /* Resultado */
+  .insignia { text-align: center; padding: 26px 18px 20px; border-radius: var(--radius); color: #fff; position: relative; overflow: hidden; animation: pop .55s cubic-bezier(.2, 1.4, .4, 1); }
+  @keyframes pop { from { transform: scale(.8); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+  .insignia .emoji { font-size: 3.4rem; line-height: 1; }
+  .insignia .eres { font-size: .85rem; text-transform: uppercase; letter-spacing: .14em; opacity: .9; margin-top: 10px; }
+  .insignia .titulo { font-size: 2rem; font-weight: 800; letter-spacing: -.02em; margin: 2px 0 4px; }
+  .insignia .sub { font-size: .9rem; opacity: .92; }
+  .insignia .lema { margin-top: 10px; font-style: italic; opacity: .95; }
+  .insignia::after { content: ""; position: absolute; inset: -40% -20% auto auto; width: 70%; height: 140%; background: rgba(255,255,255,.08); transform: rotate(20deg); pointer-events: none; }
+  .perfil-barras { display: grid; grid-template-columns: auto 1fr auto; gap: 8px 10px; align-items: center; }
+  .perfil-barras .et { font-size: .9rem; font-weight: 600; white-space: nowrap; }
+  .perfil-barras .tr { height: 14px; background: #f2f4f7; border-radius: 999px; overflow: hidden; }
+  .perfil-barras .tr > div { height: 100%; width: 0; border-radius: 999px; transition: width .9s cubic-bezier(.2, .8, .2, 1); }
+  .perfil-barras .v { font-variant-numeric: tabular-nums; font-weight: 700; font-size: .95rem; min-width: 3ch; text-align: right; }
+  .codigo { display: inline-flex; gap: 6px; align-items: center; margin-top: 8px; }
+  .codigo b { font-size: 1.3rem; letter-spacing: .1em; }
+  .mapa { width: 100%; max-width: 300px; margin: 6px auto 0; display: block; }
+  .estado-envio { display: flex; gap: 10px; align-items: center; padding: 12px 14px; border-radius: 12px; background: #ecfdf3; color: #067647; font-weight: 600; font-size: .92rem; }
+  .estado-envio.pend { background: #fffaeb; color: #b54708; }
+  .estado-envio.err { background: #fef3f2; color: #b42318; }
+  .conexion { font-size: .72rem; color: var(--ink-3); background: rgba(255,255,255,.85); padding: 4px 9px; border-radius: 999px; display: inline-flex; gap: 6px; align-items: center; margin: 0 0 6px auto; float: right; }
+  .conexion i { width: 8px; height: 8px; border-radius: 50%; background: #98a2b3; }
+  .conexion.on i { background: #12b76a; } .conexion.off i { background: #f04438; }
+  .lista { margin: 0; padding-left: 18px; color: var(--ink-2); }
+  .lista li { margin-bottom: 5px; }
+  .aviso { border-left: 4px solid var(--D); background: var(--D-soft); padding: 10px 12px; border-radius: 10px; color: #7a4b00; font-size: .9rem; }
+  .pie { text-align: center; font-size: .75rem; color: var(--ink-3); margin-top: 18px; line-height: 1.5; }
+  @media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<div id="app">
+  <div class="conexion" id="conexion" title="Conexión con la clase"><i></i><span>conectando…</span></div>
+  <div style="clear:both"></div>
+
+  <!-- ============ INICIO ============ -->
+  <section class="pantalla" id="p-inicio">
+    <div class="cabecera"><div class="logo">🧠</div><div class="curso"><b id="txt-curso"></b><span id="txt-institucion"></span></div></div>
+    <div class="card">
+      <h1>¿Cómo piensa tu cerebro?</h1>
+      <p>Test de dominancia cerebral de <b>Ned Herrmann</b>, adaptado a tu vida como estudiante de Ingeniería Comercial.</p>
+      <ul class="lista">
+        <li><b id="txt-n-preguntas">16</b> situaciones reales · unos 4 minutos.</li>
+        <li>No hay respuestas correctas: elige la opción que <b>más se parece a ti</b>, aunque ninguna calce perfecto.</li>
+        <li>Tu resultado aparece <b>en vivo en la pantalla de la clase</b>, con tu nombre y avatar.</li>
+      </ul>
+      <button class="btn" id="btn-empezar" style="margin-top:12px">Empezar →</button>
+    </div>
+    <p class="pie">El modelo de Herrmann describe <b>preferencias</b> de pensamiento, no capacidades ni etiquetas fijas.<br>Sesión: <span id="txt-sesion"></span></p>
+  </section>
+
+  <!-- ============ DATOS ============ -->
+  <section class="pantalla" id="p-datos">
+    <div class="cabecera"><div class="logo">🧠</div><div class="curso"><b id="txt-curso-2"></b>Antes de empezar</div></div>
+    <div class="card">
+      <h2>¿Quién eres?</h2>
+      <p class="mini">Así aparecerás en la pantalla de la clase.</p>
+      <label for="in-nombre">Nombre</label>
+      <input type="text" id="in-nombre" autocomplete="given-name" maxlength="40" placeholder="Ej: Antonia">
+      <label for="in-apellido">Apellido</label>
+      <input type="text" id="in-apellido" autocomplete="family-name" maxlength="40" placeholder="Ej: Rojas">
+      <label>Elige tu avatar</label>
+      <div class="avatares" id="avatares"></div>
+      <div class="error" id="err-datos"></div>
+      <button class="btn" id="btn-datos" style="margin-top:8px">Comenzar el test →</button>
+    </div>
+  </section>
+
+  <!-- ============ TEST ============ -->
+  <section class="pantalla" id="p-test">
+    <div class="meta"><span id="txt-progreso">Pregunta 1 de 16</span><span id="txt-quien"></span></div>
+    <div class="barra"><div id="barra-progreso"></div></div>
+    <div class="card" id="card-pregunta">
+      <div class="tema" id="txt-tema"></div>
+      <div class="pregunta" id="txt-pregunta"></div>
+      <div id="opciones"></div>
+      <div class="nav">
+        <button id="btn-atras">← Anterior</button>
+        <button id="btn-siguiente">Siguiente →</button>
+      </div>
+    </div>
+    <button class="btn" id="btn-terminar" style="display:none">Ver mi resultado 🎉</button>
+  </section>
+
+  <!-- ============ CALCULANDO ============ -->
+  <section class="pantalla" id="p-calc">
+    <div class="card calc">
+      <div class="cerebro">🧠</div>
+      <div class="puntos"><span></span><span></span><span></span><span></span></div>
+      <h2 id="txt-calc">Analizando tus respuestas…</h2>
+      <p class="mini">Cortical vs. límbico · izquierdo vs. derecho</p>
+    </div>
+  </section>
+
+  <!-- ============ RESULTADO ============ -->
+  <section class="pantalla" id="p-resultado">
+    <div class="cabecera"><div class="logo" id="res-avatar">🦊</div><div class="curso"><b id="res-nombre"></b><span id="txt-curso-3"></span></div></div>
+    <div class="insignia" id="insignia">
+      <div class="emoji" id="res-emoji"></div>
+      <div class="eres">Tu perfil es</div>
+      <div class="titulo" id="res-titulo"></div>
+      <div class="sub" id="res-sub"></div>
+      <div class="lema" id="res-lema"></div>
+    </div>
+    <div class="card" style="margin-top:14px">
+      <div class="estado-envio" id="estado-envio"><span>⏳</span><span>Enviando tu resultado a la pantalla de la clase…</span></div>
+    </div>
+    <div class="card">
+      <h3>Tus cuatro cuadrantes</h3>
+      <div class="perfil-barras" id="res-barras"></div>
+      <div class="codigo"><span class="mini">Código Herrmann:</span><b id="res-codigo"></b></div>
+      <p class="mini" style="margin-top:4px">1 = preferencia fuerte · 2 = cómoda · 3 = la usas poco (orden: Analítico · Organizador · Relacional · Estratega)</p>
+      <h3>Tu punto en el mapa del curso</h3>
+      <svg class="mapa" id="res-mapa" viewBox="0 0 300 300" aria-label="Mapa de cuadrantes"></svg>
+      <p class="mini" style="text-align:center" id="res-mapa-txt"></p>
+    </div>
+    <div class="card">
+      <h3>Cómo piensas</h3>
+      <p id="res-desc"></p>
+      <h3>Fortalezas</h3>
+      <div id="res-fort"></div>
+      <h3>Punto ciego</h3>
+      <p id="res-ciego"></p>
+      <h3>En un equipo</h3>
+      <p id="res-equipo"></p>
+      <h3>Dónde brillas</h3>
+      <p id="res-roles"></p>
+      <div class="aviso" id="res-tip"></div>
+    </div>
+    <div class="card">
+      <p class="mini">👀 Mira la pantalla: ¿en qué cuadrante está la mayoría del curso? ¿Con quién te tocaría trabajar para tener un equipo de “cerebro completo”?</p>
+      <button class="btn ghost" id="btn-reiniciar">Volver a contestar</button>
+    </div>
+    <p class="pie">Modelo de Dominancia Cerebral de Ned Herrmann (HBDI). Versión educativa adaptada para la clase.</p>
+  </section>
+
+  <!-- ============ ERROR ============ -->
+  <section class="pantalla" id="p-error">
+    <div class="card">
+      <h2>Ups, algo falta</h2>
+      <p id="txt-error"></p>
+    </div>
+  </section>
+</div>
+
+<script src="config.js"></script>
+<script src="preguntas.js"></script>
+<script src="lib.js"></script>
+<script>
+(function () {
+  'use strict';
+  const CFG = window.HERMANN_CONFIG || {};
+  const H = window.HERMANN;
+  const FB = window.FB;
+  const Q = H.PREGUNTAS, N = Q.length, LETRAS = H.LETRAS;
+  const params = new URLSearchParams(location.search);
+  const SESION = String(params.get('s') || CFG.sesion || 'demo').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40) || 'demo';
+  const LS_KEY = 'hermann:' + SESION;
+  const $ = (id) => document.getElementById(id);
+
+  /* ---------- estado local (persistente en el teléfono) ---------- */
+  function nuevoId() { return Math.random().toString(36).slice(2, 8) + Date.now().toString(36).slice(-4); }
+  function baraja(n, semilla) { // permutación determinista por pregunta (orden de opciones)
+    const arr = LETRAS.slice(); let s = semilla;
+    for (let i = arr.length - 1; i > 0; i--) { s = (s * 9301 + 49297) % 233280; const j = Math.floor((s / 233280) * (i + 1)); [arr[i], arr[j]] = [arr[j], arr[i]]; }
+    return arr;
+  }
+  function estadoNuevo() {
+    const semilla = Math.floor(Math.random() * 100000);
+    return { cid: nuevoId(), nombre: '', apellido: '', avatar: '', respuestas: Array(N).fill(''), orden: Q.map((q, i) => baraja(4, semilla + i * 7)), idx: 0, inicio: null, fin: null, pantalla: 'inicio', enviado: false };
+  }
+  function cargar() { try { const s = JSON.parse(localStorage.getItem(LS_KEY)); if (s && s.cid && Array.isArray(s.respuestas) && s.respuestas.length === N) return s; } catch (e) {} return null; }
+  function guardar() { try { localStorage.setItem(LS_KEY, JSON.stringify(E)); } catch (e) {} }
+  let E = cargar() || estadoNuevo();
+
+  /* ---------- Firebase ---------- */
+  let db = null, conectado = false, fbError = null, presenciaLista = false, latido = null, desconexionVoluntaria = false;
+  const refVivo = () => FB.ref(db, 'sesiones/' + SESION + '/en_vivo/' + E.cid);
+  const refResp = () => FB.ref(db, 'sesiones/' + SESION + '/respuestas/' + E.cid);
+  function initFirebase() {
+    try {
+      const fc = CFG.firebase || {};
+      if (!window.__HERMANN_EMULADOR__ && (!fc.apiKey || /PEGA_AQUI/.test(fc.apiKey) || !fc.databaseURL)) throw new Error('Falta la configuración de Firebase en config.js');
+      const app = FB.getApps().length ? FB.getApps()[0] : FB.initializeApp(fc);
+      db = FB.getDatabase(app, fc.databaseURL);
+      if (window.__HERMANN_EMULADOR__) FB.connectDatabaseEmulator(db, window.__HERMANN_EMULADOR__.host, window.__HERMANN_EMULADOR__.port);
+      FB.onValue(FB.ref(db, '.info/connected'), (s) => { conectado = !!s.val(); pintarConexion(); if (conectado && E.pantalla === 'test') publicarProgreso(); });
+    } catch (e) { fbError = e; db = null; pintarConexion(); console.warn('Firebase no disponible:', e); }
+  }
+  function pintarConexion() {
+    const el = $('conexion');
+    if (!db) { el.className = 'conexion off'; el.lastElementChild.textContent = 'sin conexión con la clase'; return; }
+    if (desconexionVoluntaria && !conectado) { el.className = 'conexion on'; el.lastElementChild.textContent = 'resultado enviado'; return; }
+    el.className = 'conexion ' + (conectado ? 'on' : 'off');
+    el.lastElementChild.textContent = conectado ? 'en vivo · ' + SESION : 'reconectando…';
+  }
+  function display() { return H.nombrePublico(E.nombre, E.apellido, CFG.mostrarApellido || 'inicial'); }
+  function progreso() { return E.respuestas.filter(Boolean).length; }
+  let publicando = null, pendiente = false;
+  function publicarProgreso(extra) {
+    if (!db || !E.nombre) return Promise.resolve();
+    if (publicando) { pendiente = true; return publicando; } // una escritura a la vez por documento
+    const data = Object.assign({ display: display(), avatar: E.avatar || '🙂', progreso: progreso(), total: N, listo: !!E.fin, ts: FB.serverTimestamp() }, extra || {});
+    publicando = FB.update(refVivo(), data).catch(() => {}).then(() => {
+      publicando = null;
+      if (!presenciaLista) { presenciaLista = true; FB.onDisconnect(refVivo()).remove().catch(() => {}); }
+      if (pendiente) { pendiente = false; return publicarProgreso(); }
+    });
+    return publicando;
+  }
+  function iniciarLatido() { if (latido) return; latido = setInterval(() => { if (E.pantalla === 'test' || E.pantalla === 'datos') publicarProgreso(); }, 25000); }
+  function detenerLatido() { if (latido) { clearInterval(latido); latido = null; } }
+
+  /* ---------- navegación ---------- */
+  function ir(p) {
+    document.querySelectorAll('.pantalla').forEach(s => s.classList.remove('activa'));
+    $('p-' + p).classList.add('activa');
+    E.pantalla = p; guardar(); window.scrollTo(0, 0);
+  }
+
+  /* ---------- inicio ---------- */
+  function pintarTextos() {
+    ['txt-curso', 'txt-curso-2'].forEach(id => $(id).textContent = CFG.curso || 'Test de Herrmann');
+    $('txt-curso-3').textContent = (CFG.curso || '') + (CFG.profesor ? ' · ' + CFG.profesor : '');
+    $('txt-institucion').textContent = CFG.institucion || '';
+    $('txt-n-preguntas').textContent = N; $('txt-sesion').textContent = SESION;
+  }
+  $('btn-empezar').addEventListener('click', () => ir('datos'));
+
+  /* ---------- datos ---------- */
+  function pintarAvatares() {
+    const cont = $('avatares'); cont.innerHTML = '';
+    if (!E.avatar) E.avatar = H.AVATARES[Math.floor(Math.random() * H.AVATARES.length)];
+    H.AVATARES.forEach(a => {
+      const b = document.createElement('button'); b.type = 'button'; b.textContent = a; b.className = a === E.avatar ? 'sel' : '';
+      b.addEventListener('click', () => { E.avatar = a; cont.querySelectorAll('button').forEach(x => x.classList.toggle('sel', x.textContent === a)); guardar(); });
+      cont.appendChild(b);
+    });
+    $('in-nombre').value = E.nombre || ''; $('in-apellido').value = E.apellido || '';
+  }
+  $('btn-datos').addEventListener('click', () => {
+    const nombre = $('in-nombre').value.trim().replace(/\s+/g, ' '), apellido = $('in-apellido').value.trim().replace(/\s+/g, ' ');
+    if (nombre.length < 2) { $('err-datos').textContent = 'Escribe tu nombre para aparecer en la pantalla.'; $('in-nombre').focus(); return; }
+    if (apellido.length < 2) { $('err-datos').textContent = 'Escribe tu apellido (en pantalla solo se muestra la inicial).'; $('in-apellido').focus(); return; }
+    $('err-datos').textContent = '';
+    E.nombre = nombre.slice(0, 40); E.apellido = apellido.slice(0, 40); if (!E.inicio) E.inicio = Date.now();
+    guardar(); publicarProgreso(); iniciarLatido(); E.idx = Math.min(E.respuestas.findIndex(r => !r) === -1 ? N - 1 : E.respuestas.findIndex(r => !r), N - 1); ir('test'); pintarPregunta();
+  });
+
+  /* ---------- test ---------- */
+  function pintarPregunta() {
+    const i = E.idx, q = Q[i];
+    $('txt-progreso').textContent = 'Pregunta ' + (i + 1) + ' de ' + N;
+    $('txt-quien').textContent = (E.avatar || '') + ' ' + display();
+    $('barra-progreso').style.width = Math.round(100 * progreso() / N) + '%';
+    $('txt-tema').textContent = q.tema; $('txt-pregunta').textContent = q.texto;
+    const cont = $('opciones'); cont.innerHTML = '';
+    const orden = (E.orden && E.orden[i]) || LETRAS;
+    orden.forEach((letra, k) => {
+      const b = document.createElement('button'); b.type = 'button'; b.className = 'opcion' + (E.respuestas[i] === letra ? ' sel' : ''); b.dataset.letra = letra;
+      b.innerHTML = '<span class="n">' + (k + 1) + '</span><span></span>'; b.lastElementChild.textContent = q.opciones[letra];
+      b.addEventListener('click', () => elegir(letra));
+      cont.appendChild(b);
+    });
+    const card = $('card-pregunta'); card.style.animation = 'none'; void card.offsetWidth; card.style.animation = 'entrar .3s ease-out';
+    $('btn-atras').disabled = i === 0;
+    const ultima = i === N - 1, completo = progreso() === N;
+    $('btn-siguiente').style.visibility = ultima ? 'hidden' : 'visible';
+    $('btn-siguiente').disabled = !E.respuestas[i];
+    $('btn-terminar').style.display = (ultima || completo) ? 'block' : 'none';
+    $('btn-terminar').disabled = !completo;
+    $('btn-terminar').textContent = completo ? 'Ver mi resultado 🎉' : 'Responde todas las preguntas para ver tu resultado';
+  }
+  let avanzando = false;
+  function elegir(letra) {
+    if (avanzando) return;
+    E.respuestas[E.idx] = letra; guardar();
+    document.querySelectorAll('.opcion').forEach(o => o.classList.toggle('sel', o.dataset.letra === letra));
+    $('barra-progreso').style.width = Math.round(100 * progreso() / N) + '%';
+    publicarProgreso();
+    if (E.idx < N - 1) { avanzando = true; setTimeout(() => { avanzando = false; E.idx++; guardar(); pintarPregunta(); }, 330); }
+    else pintarPregunta();
+  }
+  $('btn-atras').addEventListener('click', () => { if (E.idx > 0) { E.idx--; guardar(); pintarPregunta(); } });
+  $('btn-siguiente').addEventListener('click', () => { if (E.idx < N - 1 && E.respuestas[E.idx]) { E.idx++; guardar(); pintarPregunta(); } });
+  $('btn-terminar').addEventListener('click', terminar);
+
+  /* ---------- calcular + enviar ---------- */
+  const FRASES = ['Analizando tus respuestas…', 'Midiendo cortical vs. límbico…', 'Comparando hemisferios…', 'Dibujando tu perfil…'];
+  function terminar() {
+    if (progreso() !== N) return;
+    E.fin = E.fin || Date.now(); guardar(); detenerLatido();
+    ir('calc');
+    let k = 0; $('txt-calc').textContent = FRASES[0];
+    const t = setInterval(() => { k++; if (k < FRASES.length) $('txt-calc').textContent = FRASES[k]; }, 650);
+    const perfil = H.calcularPerfil(H.contar(E.respuestas.join('')));
+    const envio = enviar(perfil);
+    setTimeout(() => { clearInterval(t); ir('resultado'); pintarResultado(perfil); envio.then(pintarEnvio); }, 2600);
+  }
+  function enviar(perfil) {
+    if (!db) return Promise.resolve({ ok: false, motivo: 'sin-config' });
+    const data = {
+      nombre: E.nombre, apellido: E.apellido, display: display(), avatar: E.avatar || '🙂',
+      A: perfil.conteos.A, B: perfil.conteos.B, C: perfil.conteos.C, D: perfil.conteos.D, total: perfil.total,
+      principal: perfil.principal, dominantes: perfil.dominantes.join(''), primarias: perfil.primarias.join(''),
+      codigo: perfil.codigo, tipo: perfil.tipo, titulo: perfil.titulo, secuencia: E.respuestas.join(''),
+      x: Math.round(perfil.x * 1000) / 1000, y: Math.round(perfil.y * 1000) / 1000,
+      dur: E.inicio ? Math.round((E.fin - E.inicio) / 1000) : null, ts: FB.serverTimestamp(), cid: E.cid, v: 2
+    };
+    const timeout = new Promise((_, rej) => setTimeout(() => rej(new Error('timeout')), 15000));
+    return Promise.race([FB.set(refResp(), data), timeout])
+      .then(() => publicarProgreso({ progreso: N, listo: true, principal: perfil.principal }))
+      .then(() => { E.enviado = true; guardar(); setTimeout(() => { desconectar(); }, 2500); return { ok: true }; })
+      .catch((e) => { console.warn('No se pudo enviar', e); return { ok: false, motivo: String(e && e.message || e) }; });
+  }
+  function pintarEnvio(r) {
+    const el = $('estado-envio');
+    if (r.ok) { el.className = 'estado-envio'; el.innerHTML = '<span>✅</span><span>¡Listo! Tu resultado ya está en la pantalla de la clase.</span>'; }
+    else if (r.motivo === 'sin-config') { el.className = 'estado-envio pend'; el.innerHTML = '<span>📵</span><span>Modo sin conexión: muéstrale esta pantalla a tu profesor.</span>'; }
+    else { el.className = 'estado-envio err'; el.innerHTML = '<span>⚠️</span><span>No se pudo enviar a la pantalla (' + escapa(r.motivo) + '). Revisa tu conexión y toca aquí para reintentar.</span>'; el.style.cursor = 'pointer'; el.onclick = () => { el.onclick = null; el.className = 'estado-envio pend'; el.innerHTML = '<span>⏳</span><span>Reintentando…</span>'; reconectar(); enviar(H.calcularPerfil(H.contar(E.respuestas.join('')))).then(pintarEnvio); }; }
+  }
+  function escapa(s) { return String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c])); }
+  // Tras enviar el resultado liberamos la conexión (Firebase gratis admite 100 conexiones simultáneas).
+  function desconectar() { if (!db) return; desconexionVoluntaria = true; try { FB.goOffline(db); } catch (e) {} pintarConexion(); }
+  function reconectar() { if (!db) return; desconexionVoluntaria = false; try { FB.goOnline(db); } catch (e) {} pintarConexion(); }
+
+  /* ---------- resultado ---------- */
+  function pintarResultado(p) {
+    const Cq = H.CUADRANTES, principal = Cq[p.principal];
+    $('res-avatar').textContent = E.avatar || '🙂'; $('res-nombre').textContent = E.nombre + ' ' + E.apellido;
+    const colores = p.primarias.map(k => Cq[k].colorClaro);
+    const ins = $('insignia');
+    ins.style.background = colores.length > 1 ? 'linear-gradient(135deg, ' + colores.join(', ') + ')' : principal.colorClaro;
+    $('res-emoji').textContent = p.primarias.map(k => Cq[k].emoji).join(' ');
+    $('res-titulo').textContent = p.titulo; $('res-sub').textContent = p.subtitulo;
+    $('res-lema').textContent = p.primarias.length === 1 ? principal.lema : p.primarias.map(k => Cq[k].lema).join(' · ');
+    const barras = $('res-barras'); barras.innerHTML = '';
+    LETRAS.forEach(k => {
+      const q = Cq[k];
+      const et = document.createElement('div'); et.className = 'et'; et.textContent = q.emoji + ' ' + q.nombre;
+      const tr = document.createElement('div'); tr.className = 'tr'; const f = document.createElement('div'); f.style.background = q.colorClaro; tr.appendChild(f);
+      const v = document.createElement('div'); v.className = 'v'; v.textContent = p.pct[k] + '%';
+      barras.append(et, tr, v);
+      requestAnimationFrame(() => setTimeout(() => { f.style.width = p.pct[k] + '%'; }, 80));
+    });
+    $('res-codigo').textContent = p.codigo;
+    $('res-desc').textContent = p.descripcion;
+    const fort = $('res-fort'); fort.innerHTML = '';
+    p.primarias.forEach(k => Cq[k].fortalezas.forEach(f => { const s = document.createElement('span'); s.className = 'chip'; s.style.background = Cq[k].colorClaro + '1f'; s.style.color = Cq[k].colorClaro; s.textContent = f; fort.appendChild(s); }));
+    $('res-ciego').textContent = p.primarias.map(k => Cq[k].puntoCiego).join(' ');
+    $('res-equipo').textContent = p.primarias.length === 1 ? principal.enEquipo : 'Tu perfil combina ' + p.primarias.map(k => Cq[k].nombre.toLowerCase()).join(' y ') + ': puedes hacer de puente entre compañeros que piensan distinto. Busca a quien tenga fuerte lo que a ti te falta: ' + LETRAS.filter(k => p.nivel[k] === 3).map(k => Cq[k].nombre).join(', ') + '.';
+    if (!LETRAS.some(k => p.nivel[k] === 3)) $('res-equipo').textContent = $('res-equipo').textContent.replace(/Busca a quien.*$/, 'No tienes cuadrantes débiles: eres de los pocos que puede traducir entre todos.');
+    $('res-roles').textContent = p.primarias.map(k => Cq[k].roles).join(' ');
+    $('res-tip').textContent = '💡 Tip: ' + p.primarias.map(k => Cq[k].tip).join(' ');
+    pintarMapa(p);
+  }
+  function pintarMapa(p) {
+    const svg = $('res-mapa'); const Cq = H.CUADRANTES; const s = 300, m = 10, w = (s - 2 * m) / 2;
+    const cell = (k, x, y) => '<rect x="' + x + '" y="' + y + '" width="' + w + '" height="' + w + '" rx="14" fill="' + Cq[k].colorClaro + '" opacity="' + (p.nivel[k] === 1 ? .9 : p.nivel[k] === 2 ? .45 : .18) + '"/>' +
+      '<text x="' + (x + w / 2) + '" y="' + (y + w / 2 - 8) + '" text-anchor="middle" font-size="30">' + Cq[k].emoji + '</text>' +
+      '<text x="' + (x + w / 2) + '" y="' + (y + w / 2 + 22) + '" text-anchor="middle" font-size="14" font-weight="700" fill="' + (p.nivel[k] === 1 ? '#fff' : '#101828') + '">' + Cq[k].nombre + ' ' + p.pct[k] + '%</text>';
+    const cx = s / 2 + p.x * (w - 24), cy = s / 2 - p.y * (w - 24);
+    svg.innerHTML = cell('A', m, m) + cell('D', m + w, m) + cell('B', m, m + w) + cell('C', m + w, m + w) +
+      '<text x="' + s / 2 + '" y="9" text-anchor="middle" font-size="10" fill="#475467">CORTICAL (pensar)</text><text x="' + s / 2 + '" y="' + (s - 1) + '" text-anchor="middle" font-size="10" fill="#475467">LÍMBICO (sentir / hacer)</text>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="16" fill="#fff" opacity=".35"><animate attributeName="r" values="12;22;12" dur="1.8s" repeatCount="indefinite"/></circle>' +
+      '<circle cx="' + cx + '" cy="' + cy + '" r="11" fill="#101828" stroke="#fff" stroke-width="3"/>' +
+      '<text x="' + cx + '" y="' + (cy + 5) + '" text-anchor="middle" font-size="13">' + (E.avatar || '•') + '</text>';
+    $('res-mapa-txt').textContent = 'Hemisferio izquierdo ' + p.hemisferio.izquierdo + '% · derecho ' + p.hemisferio.derecho + '%  ·  Cortical ' + p.modo.cortical + '% · límbico ' + p.modo.limbico + '%';
+  }
+  $('btn-reiniciar').addEventListener('click', () => {
+    if (!confirm('¿Quieres volver a contestar el test? Tu resultado anterior se reemplazará.')) return;
+    const nuevo = estadoNuevo(); nuevo.cid = E.cid; nuevo.nombre = E.nombre; nuevo.apellido = E.apellido; nuevo.avatar = E.avatar;
+    E = nuevo; guardar(); reconectar();
+    presenciaLista = false; E.inicio = Date.now(); publicarProgreso(); iniciarLatido(); ir('test'); pintarPregunta();
+  });
+
+  /* ---------- arranque ---------- */
+  pintarTextos(); pintarAvatares(); initFirebase();
+  if (E.pantalla === 'resultado' && progreso() === N) {
+    ir('resultado'); const p = H.calcularPerfil(H.contar(E.respuestas.join('')));
+    pintarResultado(p);
+    if (E.enviado) { pintarEnvio({ ok: true }); setTimeout(desconectar, 2500); }
+    else enviar(p).then(pintarEnvio);
+  } else if (E.pantalla === 'test' && E.nombre) { ir('test'); pintarPregunta(); iniciarLatido(); setTimeout(publicarProgreso, 400); }
+  else if (E.pantalla === 'datos') ir('datos');
+  else ir('inicio');
+})();
+</script>
+</body>
+</html>

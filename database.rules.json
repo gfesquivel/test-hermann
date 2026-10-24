@@ -1,0 +1,25 @@
+{
+  "rules": {
+    ".read": false,
+    ".write": false,
+    "sesiones": {
+      "$sesion": {
+        ".read": true,
+        ".write": true,
+        "respuestas": {
+          "$cid": {
+            ".validate": "newData.hasChildren(['display', 'A', 'B', 'C', 'D', 'ts']) && newData.child('display').isString() && newData.child('display').val().length <= 80 && (!newData.hasChild('nombre') || (newData.child('nombre').isString() && newData.child('nombre').val().length <= 60)) && (!newData.hasChild('apellido') || (newData.child('apellido').isString() && newData.child('apellido').val().length <= 60)) && newData.child('A').isNumber() && newData.child('B').isNumber() && newData.child('C').isNumber() && newData.child('D').isNumber() && (!newData.hasChild('secuencia') || (newData.child('secuencia').isString() && newData.child('secuencia').val().length <= 40))"
+          }
+        },
+        "en_vivo": {
+          "$cid": {
+            ".validate": "newData.hasChildren(['display', 'progreso', 'ts']) && newData.child('display').isString() && newData.child('display').val().length <= 80 && newData.child('progreso').isNumber()"
+          }
+        },
+        "$otro": {
+          ".validate": false
+        }
+      }
+    }
+  }
+}

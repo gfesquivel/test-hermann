@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0f1420">
+<title>Test de Herrmann · Resultados en vivo</title>
+<style>
+  :root {
+    --bg: #0f1420; --panel: #161d2d; --panel-2: #1c2538; --line: #263045; --ink: #f3f5f9; --ink-2: #aab4c8; --ink-3: #6b7892;
+    --A: #4e82e5; --B: #297613; --C: #db4781; --D: #bf8610;
+    --A-txt: #8fb3f5; --B-txt: #6cc34a; --C-txt: #f27aa9; --D-txt: #f0b64a;
+    --ok: #12b76a; --warn: #f79009; --radius: 16px;
+    --top-h: 66px; --foot-h: 44px;
+  }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; height: 100%; }
+  body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; background: var(--bg); color: var(--ink); overflow: hidden; line-height: 1.4; }
+  button { font: inherit; }
+  /* ---- barra superior ---- */
+  .top { height: var(--top-h); display: flex; align-items: center; gap: 14px; padding: 0 18px; border-bottom: 1px solid var(--line); background: linear-gradient(180deg, #141b2b, var(--bg)); }
+  .brand { display: flex; align-items: center; gap: 10px; min-width: 0; }
+  .brand .logo { font-size: 1.7rem; }
+  .brand h1 { font-size: 1.05rem; margin: 0; letter-spacing: -.01em; white-space: nowrap; }
+  .brand h1 span { color: var(--ink-3); font-weight: 500; }
+  .brand .curso { font-size: .75rem; color: var(--ink-3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .vivo { display: inline-flex; align-items: center; gap: 6px; font-size: .72rem; font-weight: 700; letter-spacing: .08em; text-transform: uppercase; color: #ff6b6b; }
+  .vivo i { width: 8px; height: 8px; border-radius: 50%; background: #ff6b6b; animation: parpadeo 1.4s infinite; }
+  .vivo.off { color: var(--ink-3); } .vivo.off i { background: var(--ink-3); animation: none; }
+  @keyframes parpadeo { 0%, 100% { opacity: 1; } 50% { opacity: .25; } }
+  .stats { display: flex; gap: 8px; margin-left: auto; }
+  .stat { background: var(--panel); border: 1px solid var(--line); border-radius: 12px; padding: 6px 12px; display: flex; align-items: center; gap: 8px; font-variant-numeric: tabular-nums; }
+  .stat b { font-size: 1.25rem; }
+  .stat span { font-size: .72rem; color: var(--ink-2); text-transform: uppercase; letter-spacing: .06em; }
+  .acciones { display: flex; gap: 6px; }
+  .btn { background: var(--panel); border: 1px solid var(--line); color: var(--ink); border-radius: 10px; padding: 8px 12px; cursor: pointer; font-size: .85rem; font-weight: 600; display: inline-flex; align-items: center; gap: 6px; white-space: nowrap; }
+  .btn:hover { background: var(--panel-2); }
+  .btn.primario { background: #2a6fd0; border-color: #2a6fd0; }
+  .btn.primario:hover { background: #3b7ddb; }
+  .btn.activo { border-color: #4e82e5; color: #8fb3f5; }
+  .btn.peligro { color: #ff8a8a; }
+  /* ---- cuerpo ---- */
+  .cuerpo { display: grid; grid-template-columns: minmax(0, 1fr) minmax(360px, 34%); height: calc(100vh - var(--top-h) - var(--foot-h)); }
+  .mapa-wrap { position: relative; display: grid; place-items: center; padding: 14px; min-width: 0; }
+  .mapa { width: min(100%, calc(100vh - var(--top-h) - var(--foot-h) - 28px)); aspect-ratio: 1; display: block; }
+  .mapa .celda { stroke: var(--bg); stroke-width: 6; }
+  .mapa .etq-q { font-weight: 800; font-size: 34px; letter-spacing: -.01em; }
+  .mapa .etq-n { font-size: 26px; font-weight: 700; font-variant-numeric: tabular-nums; }
+  .mapa .etq-eje { font-size: 15px; letter-spacing: .14em; fill: var(--ink-3); font-weight: 700; }
+  .mapa .alumno { cursor: pointer; transition: transform .6s cubic-bezier(.2, 1.2, .3, 1); }
+  .mapa .alumno text.av { font-size: 22px; pointer-events: none; }
+  .mapa .alumno text.nom { font-size: 14px; font-weight: 600; fill: var(--ink); paint-order: stroke; stroke: var(--bg); stroke-width: 4px; stroke-linejoin: round; pointer-events: none; }
+  .mapa .alumno.nuevo circle.c { animation: aparecer .7s cubic-bezier(.2, 1.4, .4, 1) both; transform-box: fill-box; transform-origin: center; }
+  @keyframes aparecer { from { transform: scale(0); } 60% { transform: scale(1.35); } to { transform: scale(1); } }
+  .mapa.sin-nombres .alumno text.nom { display: none; }
+  .overlay { position: absolute; inset: 14px; display: grid; place-items: center; background: rgba(15, 20, 32, .92); border-radius: 24px; backdrop-filter: blur(6px); z-index: 3; }
+  .overlay.oculto { display: none; }
+  .lobby { text-align: center; max-width: 720px; padding: 20px; }
+  .lobby h2 { font-size: 2.1rem; margin: 0 0 6px; letter-spacing: -.02em; }
+  .lobby .url { font-size: 2.2rem; font-weight: 800; color: #8fb3f5; letter-spacing: -.01em; word-break: break-all; margin: 6px 0 10px; }
+  .lobby .qr { background: #fff; padding: 14px; border-radius: 18px; display: inline-block; margin: 8px 0 14px; }
+  .lobby .qr svg, .lobby .qr img { display: block; width: 220px; height: 220px; }
+  .lobby .cuenta { font-size: 1.1rem; color: var(--ink-2); }
+  .lobby .cuenta b { color: var(--ink); font-size: 1.6rem; }
+  .lobby .barra { height: 12px; background: var(--line); border-radius: 999px; overflow: hidden; margin: 14px auto 0; max-width: 460px; }
+  .lobby .barra div { height: 100%; width: 0; background: linear-gradient(90deg, var(--A), var(--C)); transition: width .5s ease; border-radius: 999px; }
+  .lobby .chips { display: flex; flex-wrap: wrap; justify-content: center; gap: 6px; margin-top: 14px; max-height: 120px; overflow: hidden; }
+  .lobby .chips span { background: var(--panel); border: 1px solid var(--line); border-radius: 999px; padding: 4px 10px; font-size: .85rem; animation: aparecer .5s both; }
+  .tooltip { position: fixed; z-index: 20; background: #0b0f19; border: 1px solid var(--line); border-radius: 12px; padding: 10px 12px; font-size: .85rem; pointer-events: none; display: none; min-width: 220px; box-shadow: 0 10px 30px rgba(0,0,0,.5); }
+  .tooltip b { font-size: 1rem; }
+  .tooltip .mini-barras { display: grid; grid-template-columns: auto 1fr auto; gap: 3px 8px; margin-top: 6px; align-items: center; }
+  .tooltip .mini-barras i { display: block; height: 7px; border-radius: 999px; }
+  /* ---- panel lateral ---- */
+  .lateral { border-left: 1px solid var(--line); display: flex; flex-direction: column; min-height: 0; background: var(--panel); }
+  .tabs { display: flex; border-bottom: 1px solid var(--line); overflow-x: auto; }
+  .tabs button { flex: 1; background: none; border: 0; color: var(--ink-3); padding: 12px 8px; font-weight: 700; font-size: .82rem; cursor: pointer; border-bottom: 2px solid transparent; white-space: nowrap; }
+  .tabs button.activo { color: var(--ink); border-bottom-color: #4e82e5; }
+  .tab { display: none; overflow-y: auto; padding: 14px; flex: 1; min-height: 0; }
+  .tab.activo { display: block; }
+  h3 { font-size: .74rem; text-transform: uppercase; letter-spacing: .1em; color: var(--ink-3); margin: 14px 0 8px; }
+  h3:first-child { margin-top: 0; }
+  .vacio { color: var(--ink-3); font-size: .9rem; padding: 10px 0; }
+  /* participantes */
+  .lista { display: flex; flex-direction: column; gap: 6px; }
+  .persona { display: grid; grid-template-columns: 34px 1fr auto; gap: 10px; align-items: center; background: var(--panel-2); border-radius: 12px; padding: 7px 10px; border: 1px solid transparent; }
+  .persona.nueva { animation: resaltar 1.4s ease-out; }
+  @keyframes resaltar { from { border-color: #8fb3f5; background: #223a66; } }
+  .persona .av { font-size: 1.4rem; text-align: center; }
+  .persona .nom { font-weight: 600; font-size: .92rem; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .persona .sub { font-size: .74rem; color: var(--ink-3); }
+  .persona .prog { height: 6px; background: var(--line); border-radius: 999px; overflow: hidden; margin-top: 4px; width: 100%; }
+  .persona .prog div { height: 100%; background: #8fb3f5; border-radius: 999px; transition: width .4s; }
+  .persona .perfil { display: flex; gap: 4px; align-items: center; font-size: .8rem; font-weight: 700; }
+  .punto { width: 12px; height: 12px; border-radius: 50%; display: inline-block; }
+  /* resumen */
+  .barras { display: grid; grid-template-columns: auto 1fr auto; gap: 8px 10px; align-items: center; }
+  .barras .et { font-weight: 700; font-size: .9rem; white-space: nowrap; }
+  .barras .tr { height: 18px; background: var(--line); border-radius: 6px; overflow: hidden; }
+  .barras .tr div { height: 100%; width: 0; border-radius: 6px; transition: width .7s cubic-bezier(.2, .8, .2, 1); min-width: 0; }
+  .barras .v { font-variant-numeric: tabular-nums; font-weight: 700; text-align: right; min-width: 7ch; font-size: .9rem; }
+  .kpis { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .kpi { background: var(--panel-2); border-radius: 12px; padding: 10px 12px; }
+  .kpi b { font-size: 1.35rem; display: block; font-variant-numeric: tabular-nums; }
+  .kpi span { font-size: .74rem; color: var(--ink-3); }
+  .split { display: flex; gap: 2px; height: 22px; border-radius: 8px; overflow: hidden; font-size: .75rem; font-weight: 700; margin: 6px 0 10px; }
+  .split div { display: grid; place-items: center; transition: width .7s; min-width: 0; overflow: hidden; white-space: nowrap; }
+  /* preguntas */
+  .preg { background: var(--panel-2); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; }
+  .preg .t { display: flex; justify-content: space-between; font-size: .85rem; font-weight: 700; gap: 8px; }
+  .preg .t span:last-child { color: var(--ink-3); font-weight: 500; white-space: nowrap; }
+  .preg .pila { display: flex; gap: 2px; height: 14px; border-radius: 6px; overflow: hidden; margin-top: 6px; background: var(--line); }
+  .preg .pila div { transition: width .6s; min-width: 0; }
+  .preg .det { display: none; margin-top: 8px; font-size: .8rem; color: var(--ink-2); }
+  .preg.abierta .det { display: block; }
+  .preg .det div { display: grid; grid-template-columns: 56px 1fr; gap: 8px; margin-bottom: 4px; }
+  .preg .det b { font-variant-numeric: tabular-nums; }
+  /* equipos */
+  .equipos { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+  .equipo { background: var(--panel-2); border-radius: 12px; padding: 10px; }
+  .equipo h4 { margin: 0 0 6px; font-size: .85rem; display: flex; justify-content: space-between; }
+  .equipo .m { font-size: .82rem; display: flex; gap: 6px; align-items: center; padding: 2px 0; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .fila { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; margin-bottom: 10px; }
+  select { background: var(--panel-2); color: var(--ink); border: 1px solid var(--line); border-radius: 10px; padding: 7px 10px; font: inherit; }
+  /* discusión */
+  .prompt { background: var(--panel-2); border-left: 3px solid #4e82e5; border-radius: 10px; padding: 10px 12px; margin-bottom: 8px; font-size: .9rem; }
+  .prompt small { display: block; color: var(--ink-3); margin-top: 4px; }
+  .dato { background: linear-gradient(135deg, #1d2a48, #162036); border-radius: 12px; padding: 10px 12px; margin-bottom: 8px; font-size: .92rem; }
+  /* pie / ticker */
+  .pie { height: var(--foot-h); border-top: 1px solid var(--line); display: flex; align-items: center; padding: 0 18px; gap: 14px; font-size: .85rem; color: var(--ink-2); overflow: hidden; }
+  .pie .ticker { display: flex; gap: 18px; white-space: nowrap; overflow: hidden; flex: 1; }
+  .pie .ticker span { animation: aparecer .5s both; }
+  .pie .sesion { color: var(--ink-3); font-size: .75rem; }
+  /* modal */
+  .modal { position: fixed; inset: 0; background: rgba(0,0,0,.7); display: none; place-items: center; z-index: 30; }
+  .modal.abierto { display: grid; }
+  .modal .caja { background: var(--panel); border: 1px solid var(--line); border-radius: 20px; padding: 24px; max-width: 560px; width: 92vw; text-align: center; }
+  .modal .caja h2 { margin: 0 0 8px; }
+  .modal .url { font-size: 1.6rem; font-weight: 800; color: #8fb3f5; word-break: break-all; }
+  .modal .qr { background: #fff; border-radius: 16px; padding: 14px; display: inline-block; margin: 12px 0; }
+  .modal .qr svg { display: block; width: min(60vh, 360px); height: min(60vh, 360px); }
+  .menu { position: fixed; top: calc(var(--top-h) - 6px); right: 18px; background: var(--panel); border: 1px solid var(--line); border-radius: 14px; padding: 6px; display: none; flex-direction: column; z-index: 25; min-width: 260px; box-shadow: 0 12px 40px rgba(0,0,0,.5); }
+  .menu.abierto { display: flex; }
+  .menu button { background: none; border: 0; color: var(--ink); text-align: left; padding: 10px 12px; border-radius: 10px; cursor: pointer; font-size: .9rem; }
+  .menu button:hover { background: var(--panel-2); }
+  .menu button.peligro { color: #ff8a8a; }
+  .menu small { color: var(--ink-3); padding: 6px 12px 4px; }
+  #confetti { position: fixed; inset: 0; pointer-events: none; z-index: 40; }
+  .aviso { position: fixed; left: 50%; bottom: calc(var(--foot-h) + 14px); transform: translateX(-50%); background: #fef3f2; color: #b42318; padding: 10px 16px; border-radius: 12px; font-weight: 600; z-index: 50; display: none; max-width: 80vw; }
+  @media (max-width: 900px) { .cuerpo { grid-template-columns: 1fr; grid-template-rows: auto 1fr; } .mapa { width: min(100%, 60vh); } .stats .stat span { display: none; } .brand .curso { display: none; } body { overflow: auto; } }
+</style>
+</head>
+<body>
+<header class="top">
+  <div class="brand"><div class="logo">🧠</div><div><h1>Test de Herrmann <span>· resultados en vivo</span></h1><div class="curso" id="txt-curso"></div></div></div>
+  <div class="vivo off" id="vivo"><i></i><span>conectando</span></div>
+  <div class="stats">
+    <div class="stat" title="Alumnos que entraron (contestando + listos)">👥 <b id="st-online">0</b><span>participantes</span></div>
+    <div class="stat" title="Están contestando el test">✍️ <b id="st-curso">0</b><span>contestando</span></div>
+    <div class="stat" title="Resultados recibidos">✅ <b id="st-listos">0</b><span>listos</span></div>
+  </div>
+  <div class="acciones">
+    <button class="btn" id="btn-qr" title="Mostrar el link y el QR para entrar">📱 QR</button>
+    <button class="btn" id="btn-nombres" title="Mostrar u ocultar nombres en el mapa">🏷️ Nombres</button>
+    <button class="btn primario" id="btn-mapa" title="Ocultar el mapa mientras contestan y revelarlo al final">🎉 Revelar</button>
+    <button class="btn" id="btn-sonido" title="Sonido al llegar resultados">🔊</button>
+    <button class="btn" id="btn-full" title="Pantalla completa">⛶</button>
+    <button class="btn" id="btn-menu" title="Más opciones">⋯</button>
+  </div>
+</header>
+
+<main class="cuerpo">
+  <section class="mapa-wrap">
+    <svg class="mapa" id="mapa" viewBox="0 0 1000 1000" aria-label="Mapa de cuadrantes del curso"></svg>
+    <div class="overlay" id="overlay">
+      <div class="lobby">
+        <h2 id="lobby-titulo">Entra al test desde tu celular</h2>
+        <div class="url" id="lobby-url"></div>
+        <div class="qr" id="lobby-qr"></div>
+        <div class="cuenta"><b id="lobby-listos">0</b> de <b id="lobby-total">0</b> ya tienen su resultado · <span id="lobby-curso">0 contestando</span></div>
+        <div class="barra"><div id="lobby-barra"></div></div>
+        <div class="chips" id="lobby-chips"></div>
+      </div>
+    </div>
+    <div class="tooltip" id="tooltip"></div>
+  </section>
+  <aside class="lateral">
+    <nav class="tabs">
+      <button class="activo" data-tab="participantes">Participantes</button>
+      <button data-tab="resumen">Resumen</button>
+      <button data-tab="preguntas">Preguntas</button>
+      <button data-tab="equipos">Equipos</button>
+      <button data-tab="discusion">Discusión</button>
+    </nav>
+    <div class="tab activo" id="tab-participantes"><div class="vacio">Esperando a que entren los alumnos…</div></div>
+    <div class="tab" id="tab-resumen"><div class="vacio">Aún no hay resultados.</div></div>
+    <div class="tab" id="tab-preguntas"><div class="vacio">Aún no hay resultados.</div></div>
+    <div class="tab" id="tab-equipos">
+      <div class="fila"><label>Equipos de <select id="sel-tam"><option>3</option><option selected>4</option><option>5</option><option>6</option></select> personas</label><button class="btn primario" id="btn-equipos">🧩 Armar equipos de cerebro completo</button></div>
+      <p class="vacio" style="padding:0 0 8px">Cada equipo mezcla cuadrantes distintos (una persona de cada uno cuando se puede). Ideal para discutir qué pasa cuando armamos equipos “entre parecidos”.</p>
+      <div class="equipos" id="equipos"></div>
+    </div>
+    <div class="tab" id="tab-discusion"></div>
+  </aside>
+</main>
+
+<footer class="pie">
+  <div class="ticker" id="ticker"><span style="color:var(--ink-3)">Los resultados aparecerán aquí a medida que lleguen…</span></div>
+  <div class="sesion">sesión <b id="txt-sesion"></b></div>
+</footer>
+
+<div class="modal" id="modal-qr"><div class="caja"><h2>Entra al test</h2><div class="url" id="modal-url"></div><div class="qr" id="modal-qr-img"></div><div><button class="btn" id="btn-cerrar-qr">Cerrar</button></div></div></div>
+<div class="menu" id="menu">
+  <small>Sesión actual: <b id="menu-sesion"></b></small>
+  <button id="m-copiar">🔗 Copiar link para alumnos</button>
+  <button id="m-csv">⬇️ Descargar resultados (CSV)</button>
+  <button id="m-sesion">🔁 Cambiar de sesión…</button>
+  <button id="m-borrar" class="peligro">🗑️ Borrar todos los resultados de esta sesión</button>
+</div>
+<canvas id="confetti"></canvas>
+<div class="aviso" id="aviso"></div>
+
+<script src="config.js"></script>
+<script src="preguntas.js"></script>
+<script src="lib.js"></script>
+<script>
+(function () {
+  'use strict';
+  const CFG = window.HERMANN_CONFIG || {}, H = window.HERMANN, FB = window.FB;
+  const Cq = H.CUADRANTES, LETRAS = H.LETRAS, Q = H.PREGUNTAS, N = Q.length;
+  const params = new URLSearchParams(location.search);
+  const SESION = String(params.get('s') || CFG.sesion || 'demo').replace(/[^A-Za-z0-9_-]/g, '').slice(0, 40) || 'demo';
+  const $ = (id) => document.getElementById(id);
+  const S = { vivo: {}, resp: {}, offset: 0, conectado: false, primeraCarga: true };
+  const UI = { nombres: lee('nombres', true), sonido: lee('sonido', true), mapaOculto: lee('mapaOculto', false) };
+  function lee(k, def) { try { const v = localStorage.getItem('hermann-prof:' + k); return v === null ? def : JSON.parse(v); } catch (e) { return def; } }
+  function guardaUI(k, v) { try { localStorage.setItem('hermann-prof:' + k, JSON.stringify(v)); } catch (e) {} }
+
+  /* ---------- link y QR ---------- */
+  const urlAlumnos = (() => { const u = new URL('./', location.href); if (SESION !== (CFG.sesion || 'demo')) u.search = '?s=' + SESION; return u.href; })();
+  const urlCorta = urlAlumnos.replace(/^https?:\/\//, '').replace(/\/(\?|$)/, '$1');
+  function pintarQR(cont, tam) {
+    try { const qr = window.qrcode(0, 'M'); qr.addData(urlAlumnos); qr.make(); cont.innerHTML = qr.createSvgTag({ cellSize: 6, margin: 0, scalable: true }); }
+    catch (e) { cont.textContent = urlAlumnos; }
+  }
+  $('lobby-url').textContent = urlCorta; $('modal-url').textContent = urlCorta; pintarQR($('lobby-qr')); pintarQR($('modal-qr-img'));
+  $('txt-curso').textContent = [CFG.curso, CFG.institucion].filter(Boolean).join(' · ');
+  $('txt-sesion').textContent = SESION; $('menu-sesion').textContent = SESION;
+  document.title = 'Herrmann en vivo · ' + SESION;
+
+  /* ---------- Firebase ---------- */
+  let db = null;
+  function aviso(msg, ms) { const el = $('aviso'); el.textContent = msg; el.style.display = 'block'; clearTimeout(aviso.t); aviso.t = setTimeout(() => { el.style.display = 'none'; }, ms || 5000); }
+  function initFirebase() {
+    try {
+      const fc = CFG.firebase || {};
+      if (!window.__HERMANN_EMULADOR__ && (!fc.apiKey || /PEGA_AQUI/.test(fc.apiKey) || !fc.databaseURL)) throw new Error('Falta pegar la configuración de Firebase en config.js');
+      const app = FB.getApps().length ? FB.getApps()[0] : FB.initializeApp(fc);
+      db = FB.getDatabase(app, fc.databaseURL);
+      if (window.__HERMANN_EMULADOR__) FB.connectDatabaseEmulator(db, window.__HERMANN_EMULADOR__.host, window.__HERMANN_EMULADOR__.port);
+      FB.onValue(FB.ref(db, '.info/connected'), s => { S.conectado = !!s.val(); pintarVivo(); });
+      FB.onValue(FB.ref(db, '.info/serverTimeOffset'), s => { S.offset = Number(s.val()) || 0; });
+      FB.onValue(FB.ref(db, 'sesiones/' + SESION + '/en_vivo'), s => { S.vivo = s.val() || {}; programar(); }, e => aviso('Error leyendo en_vivo: ' + e.message));
+      FB.onValue(FB.ref(db, 'sesiones/' + SESION + '/respuestas'), s => { S.resp = s.val() || {}; alLlegarRespuestas(); programar(); }, e => aviso('Error leyendo respuestas: ' + e.message));
+    } catch (e) { aviso(e.message, 60000); console.error(e); }
+  }
+  function pintarVivo() { const el = $('vivo'); el.className = 'vivo' + (S.conectado ? '' : ' off'); el.lastElementChild.textContent = S.conectado ? 'en vivo' : 'sin conexión'; }
+  const ahora = () => Date.now() + S.offset;
+
+  /* ---------- datos derivados ---------- */
+  function listos() {
+    return Object.keys(S.resp).map(cid => { const r = S.resp[cid]; if (!r || typeof r !== 'object') return null;
+      const c = { A: +r.A || 0, B: +r.B || 0, C: +r.C || 0, D: +r.D || 0 }; const p = H.calcularPerfil(c);
+      return { cid, r, p, display: String(r.display || r.nombre || 'Alumno').slice(0, 60), avatar: String(r.avatar || '🙂').slice(0, 4), ts: +r.ts || 0 }; })
+      .filter(Boolean).sort((a, b) => a.ts - b.ts);
+  }
+  function enLinea() { const t = ahora(); return Object.keys(S.vivo).map(cid => Object.assign({ cid }, S.vivo[cid] || {})).filter(v => v && v.display && (t - (+v.ts || 0)) < 90000); }
+
+  /* ---------- render (con throttle) ---------- */
+  let pendiente = false;
+  function programar() { if (pendiente) return; pendiente = true; setTimeout(() => { pendiente = false; requestAnimationFrame(render); }, 120); }
+  function render() {
+    const L = listos(), V = enLinea(); const listosSet = new Set(L.map(x => x.cid));
+    const contestando = V.filter(v => !v.listo && !listosSet.has(v.cid));
+    const total = L.length + contestando.length;
+    $('st-online').textContent = total; $('st-curso').textContent = contestando.length; $('st-listos').textContent = L.length;
+    $('lobby-listos').textContent = L.length; $('lobby-total').textContent = total; $('lobby-curso').textContent = contestando.length + ' contestando';
+    $('lobby-barra').style.width = (total ? Math.round(100 * L.length / total) : 0) + '%';
+    pintarChipsLobby(V, L); pintarParticipantes(contestando, L); pintarMapa(L); pintarResumen(L); pintarPreguntas(L); pintarDiscusion(L);
+    $('btn-mapa').textContent = UI.mapaOculto ? '🎉 Revelar mapa' : '🙈 Ocultar mapa';
+    $('overlay').classList.toggle('oculto', !UI.mapaOculto && L.length > 0);
+    $('lobby-titulo').textContent = L.length ? 'Resultados ocultos hasta revelar' : 'Entra al test desde tu celular';
+  }
+  function pintarChipsLobby(V, L) {
+    const cont = $('lobby-chips'); const vistos = new Set();
+    const items = [...L.map(x => ({ cid: x.cid, txt: x.avatar + ' ' + x.display })), ...V.filter(v => !L.some(l => l.cid === v.cid)).map(v => ({ cid: v.cid, txt: (v.avatar || '🙂') + ' ' + v.display }))];
+    items.forEach(it => { vistos.add(it.cid); let el = cont.querySelector('[data-cid="' + it.cid + '"]'); if (!el) { el = document.createElement('span'); el.dataset.cid = it.cid; cont.appendChild(el); } if (el.textContent !== it.txt) el.textContent = it.txt; });
+    [...cont.children].forEach(el => { if (!vistos.has(el.dataset.cid)) el.remove(); });
+  }
+
+  /* ---------- participantes ---------- */
+  const vistosPersona = new Set();
+  function pintarParticipantes(contestando, L) {
+    const cont = $('tab-participantes');
+    if (!contestando.length && !L.length) { cont.innerHTML = '<div class="vacio">Esperando a que entren los alumnos… Comparte el QR (botón 📱 QR).</div>'; return; }
+    const frag = document.createDocumentFragment();
+    const bloque = (titulo, arr, fn) => { if (!arr.length) return; const h = document.createElement('h3'); h.textContent = titulo + ' (' + arr.length + ')'; frag.appendChild(h); const l = document.createElement('div'); l.className = 'lista'; arr.forEach(x => l.appendChild(fn(x))); frag.appendChild(l); };
+    bloque('Contestando', contestando.sort((a, b) => (+b.progreso || 0) - (+a.progreso || 0)), v => {
+      const el = document.createElement('div'); el.className = 'persona';
+      const prog = Math.round(100 * (+v.progreso || 0) / (+v.total || N));
+      el.innerHTML = '<div class="av"></div><div><div class="nom"></div><div class="prog"><div style="width:' + prog + '%"></div></div></div><div class="sub"></div>';
+      el.children[0].textContent = v.avatar || '🙂'; el.children[1].children[0].textContent = v.display; el.children[2].textContent = (+v.progreso || 0) + '/' + (+v.total || N);
+      return el; });
+    bloque('Con resultado', L.slice().reverse(), x => {
+      const el = document.createElement('div'); el.className = 'persona' + (vistosPersona.has(x.cid) ? '' : ' nueva'); vistosPersona.add(x.cid);
+      el.innerHTML = '<div class="av"></div><div><div class="nom"></div><div class="sub"></div></div><div class="perfil"></div>';
+      el.children[0].textContent = x.avatar; el.children[1].children[0].textContent = x.display;
+      el.children[1].children[1].textContent = x.p.titulo + ' · código ' + x.p.codigo;
+      x.p.primarias.forEach(k => { const d = document.createElement('i'); d.className = 'punto'; d.style.background = Cq[k].colorOscuro; d.title = Cq[k].nombre; el.children[2].appendChild(d); });
+      el.title = LETRAS.map(k => Cq[k].nombre + ' ' + x.p.pct[k] + '%').join(' · ');
+      return el; });
+    cont.innerHTML = ''; cont.appendChild(frag);
+  }
+
+  /* ---------- mapa ---------- */
+  const SVG = 'http://www.w3.org/2000/svg';
+  const celdas = { A: [0, 0], D: [1, 0], B: [0, 1], C: [1, 1] }; // columna, fila
+  const M = 50, W = (1000 - 2 * M) / 2, R = 22;
+  const nodos = new Map(); let layoutFirma = '', revelando = false, revelacionId = 0;
+  function construirMapa() {
+    const svg = $('mapa'); svg.innerHTML = '';
+    const defs = document.createElementNS(SVG, 'defs'); defs.innerHTML = '<filter id="sombra" x="-50%" y="-50%" width="200%" height="200%"><feDropShadow dx="0" dy="3" stdDeviation="4" flood-color="#000" flood-opacity=".55"/></filter>'; svg.appendChild(defs);
+    LETRAS.forEach(k => {
+      const [cx, cy] = celdas[k]; const x = M + cx * W, y = M + cy * W;
+      const g = document.createElementNS(SVG, 'g'); g.setAttribute('id', 'celda-' + k);
+      g.innerHTML = '<rect class="celda" x="' + x + '" y="' + y + '" width="' + W + '" height="' + W + '" rx="28" fill="' + Cq[k].colorOscuro + '" fill-opacity=".16"/>' +
+        '<text class="etq-q" x="' + (x + (cx ? W - 26 : 26)) + '" y="' + (y + (cy ? W - 54 : 58)) + '" text-anchor="' + (cx ? 'end' : 'start') + '" fill="' + Cq[k].colorOscuro + '">' + Cq[k].emoji + ' ' + Cq[k].nombre + '</text>' +
+        '<text class="etq-n" id="num-' + k + '" x="' + (x + (cx ? W - 26 : 26)) + '" y="' + (y + (cy ? W - 22 : 92)) + '" text-anchor="' + (cx ? 'end' : 'start') + '" fill="' + Cq[k].colorOscuro + '">0 · 0%</text>' +
+        '<text x="' + (x + (cx ? W - 26 : 26)) + '" y="' + (y + (cy ? W - 92 : 122)) + '" text-anchor="' + (cx ? 'end' : 'start') + '" font-size="16" fill="#aab4c8" opacity=".85">' + Cq[k].zona.toUpperCase() + '</text>';
+      svg.appendChild(g);
+    });
+    const ejes = document.createElementNS(SVG, 'g');
+    ejes.innerHTML = '<text class="etq-eje" x="500" y="36" text-anchor="middle">CORTICAL · PENSAR</text><text class="etq-eje" x="500" y="984" text-anchor="middle">LÍMBICO · SENTIR Y HACER</text>' +
+      '<text class="etq-eje" x="18" y="500" text-anchor="middle" transform="rotate(-90 18 500)">HEMISFERIO IZQUIERDO</text><text class="etq-eje" x="982" y="500" text-anchor="middle" transform="rotate(90 982 500)">HEMISFERIO DERECHO</text>';
+    svg.appendChild(ejes);
+    const capa = document.createElementNS(SVG, 'g'); capa.setAttribute('id', 'capa-alumnos'); svg.appendChild(capa);
+    svg.classList.toggle('sin-nombres', !UI.nombres);
+  }
+  function hash(s) { let h = 2166136261; for (let i = 0; i < s.length; i++) { h ^= s.charCodeAt(i); h = Math.imul(h, 16777619); } return (h >>> 0) / 4294967295; }
+  // Zona útil de cada celda (deja libre la franja donde va el nombre del cuadrante: arriba en las celdas superiores, abajo en las inferiores)
+  const ETQ = 150, BORDE = 36;
+  function zona(k) { const [cx, cy] = celdas[k]; const x0 = M + cx * W + BORDE, x1 = M + cx * W + W - BORDE; const y0 = M + cy * W + (cy ? BORDE : ETQ), y1 = M + cy * W + W - (cy ? ETQ : BORDE); return { x0, x1, y0, y1, cx: (x0 + x1) / 2, cy: (y0 + y1) / 2, rx: (x1 - x0) / 2 - R, ry: (y1 - y0) / 2 - R - 14 }; }
+  // Estira las coordenadas para aprovechar la celda (los perfiles rara vez son extremos)
+  const estirar = v => Math.tanh(2.2 * v) / Math.tanh(2.2);
+  // Escala de los puntos según cuánta gente hay en la celda (más gente → puntos y nombres más chicos)
+  function escalaCelda(n) { return n <= 10 ? 1 : n <= 16 ? .9 : n <= 24 ? .8 : n <= 34 ? .7 : .6; }
+  function calcularPosiciones(L) {
+    const porCelda = { A: 0, B: 0, C: 0, D: 0 }; L.forEach(x => porCelda[x.p.principal]++);
+    const pos = L.map(x => { const k = x.p.principal; const z = zona(k); const esc = escalaCelda(porCelda[k]); const r = R * esc;
+      const conNombre = UI.nombres && porCelda[k] <= 28; // en celdas muy llenas los nombres se ocultan (quedan en el tooltip y en la lista)
+      const j = (hash(x.cid) - .5) * 70, j2 = (hash(x.cid + 'y') - .5) * 70;
+      return { cid: x.cid, k, esc, r, conNombre, fx: conNombre ? 1.9 : 1.15, x: z.cx + estirar(x.p.x) * z.rx * .95 + j, y: z.cy - estirar(x.p.y) * z.ry * .95 + j2, minx: z.x0 + r, maxx: z.x1 - r, miny: z.y0 + r, maxy: z.y1 - r - (conNombre ? 14 * esc : 0) }; });
+    for (let it = 0; it < 60; it++) {
+      for (let i = 0; i < pos.length; i++) for (let j = i + 1; j < pos.length; j++) {
+        const a = pos[i], b = pos[j]; if (a.k !== b.k) continue;
+        const fx = a.fx; const d = a.r + b.r + (a.conNombre ? 22 : 8) * a.esc;
+        let dx = (b.x - a.x) / fx, dy = b.y - a.y; const dist = Math.hypot(dx, dy) || .01;
+        if (dist < d) { const f = (d - dist) / dist * .5; dx *= f; dy *= f; a.x -= dx * fx; a.y -= dy; b.x += dx * fx; b.y += dy; }
+      }
+      pos.forEach(p => { p.x = Math.min(p.maxx, Math.max(p.minx, p.x)); p.y = Math.min(p.maxy, Math.max(p.miny, p.y)); });
+    }
+    return pos;
+  }
+  function crearNodo(x) {
+    const g = document.createElementNS(SVG, 'g'); g.setAttribute('class', 'alumno nuevo'); g.dataset.cid = x.cid;
+    g.innerHTML = '<circle class="c" filter="url(#sombra)" stroke-width="4"/><text class="av" text-anchor="middle"></text><text class="nom" text-anchor="middle"></text>';
+    g.addEventListener('mousemove', ev => mostrarTooltip(ev, x)); g.addEventListener('mouseleave', ocultarTooltip);
+    setTimeout(() => g.classList.remove('nuevo'), 900);
+    return g;
+  }
+  function aplicarNodo(g, x, p) {
+    const c = g.querySelector('circle'); c.setAttribute('r', p.r.toFixed(1)); c.setAttribute('fill', Cq[x.p.principal].colorOscuro);
+    c.setAttribute('stroke', x.p.primarias.length > 1 ? Cq[x.p.primarias.find(k => k !== x.p.principal)].colorOscuro : '#0f1420');
+    const av = g.querySelector('.av'); av.textContent = x.avatar; av.setAttribute('font-size', (22 * p.esc).toFixed(1)); av.setAttribute('dy', (8 * p.esc).toFixed(1));
+    const nom = g.querySelector('.nom'); nom.textContent = p.esc < .75 && x.display.length > 12 ? x.display.slice(0, 11) + '…' : x.display; nom.style.display = p.conNombre ? '' : 'none';
+    nom.setAttribute('font-size', (14 * Math.max(p.esc, .8)).toFixed(1)); nom.setAttribute('dy', (p.r + 16 * p.esc).toFixed(1));
+    g.style.transform = 'translate(' + p.x.toFixed(1) + 'px,' + p.y.toFixed(1) + 'px)'; g.__datos = x;
+  }
+  function pintarMapa(L) {
+    const counts = { A: 0, B: 0, C: 0, D: 0 }; L.forEach(x => counts[x.p.principal]++);
+    LETRAS.forEach(k => { $('num-' + k).textContent = counts[k] + ' · ' + (L.length ? Math.round(100 * counts[k] / L.length) : 0) + '%'; });
+    if (revelando) return; // mientras corre la animación de revelado no tocamos los nodos
+    const firma = L.map(x => x.cid + ':' + x.p.codigo).join('|') + (UI.nombres ? '#n' : '');
+    if (firma === layoutFirma) return; layoutFirma = firma;
+    const capa = $('capa-alumnos'); const pos = calcularPosiciones(L); const vivos = new Set();
+    pos.forEach((p, i) => {
+      vivos.add(p.cid); const x = L[i]; let g = nodos.get(p.cid);
+      if (!g) { g = crearNodo(x); capa.appendChild(g); nodos.set(p.cid, g); }
+      aplicarNodo(g, x, p);
+    });
+    nodos.forEach((g, cid) => { if (!vivos.has(cid)) { g.remove(); nodos.delete(cid); } });
+  }
+  function mostrarTooltip(ev, x) {
+    const t = $('tooltip'); const p = x.p;
+    t.innerHTML = '<b></b><div style="color:var(--ink-2)"></div><div class="mini-barras"></div>';
+    t.children[0].textContent = x.avatar + ' ' + x.display; t.children[1].textContent = p.titulo + ' · código ' + p.codigo + (x.r.dur ? ' · ' + Math.round(x.r.dur / 60) + ' min' : '');
+    const mb = t.children[2]; LETRAS.forEach(k => { const a = document.createElement('span'); a.textContent = Cq[k].nombre; const b = document.createElement('i'); b.style.width = p.pct[k] + '%'; b.style.background = Cq[k].colorOscuro; const c = document.createElement('span'); c.textContent = p.pct[k] + '%'; mb.append(a, b, c); });
+    t.style.display = 'block'; const w = t.offsetWidth, h = t.offsetHeight; t.style.left = Math.min(window.innerWidth - w - 10, ev.clientX + 14) + 'px'; t.style.top = Math.min(window.innerHeight - h - 10, ev.clientY + 14) + 'px';
+  }
+  function ocultarTooltip() { $('tooltip').style.display = 'none'; }
+
+  /* ---------- resumen ---------- */
+  function pintarResumen(L) {
+    const cont = $('tab-resumen');
+    if (!L.length) { cont.innerHTML = '<div class="vacio">Aún no hay resultados.</div>'; return; }
+    const n = L.length; const counts = { A: 0, B: 0, C: 0, D: 0 }; L.forEach(x => counts[x.p.principal]++);
+    const prom = { A: 0, B: 0, C: 0, D: 0 }; L.forEach(x => LETRAS.forEach(k => prom[k] += x.p.pct[k])); LETRAS.forEach(k => prom[k] = Math.round(prom[k] / n));
+    const dobles = L.filter(x => x.p.primarias.length === 2), triples = L.filter(x => x.p.primarias.length >= 3);
+    const izq = Math.round(L.reduce((s, x) => s + x.p.hemisferio.izquierdo, 0) / n), cort = Math.round(L.reduce((s, x) => s + x.p.modo.cortical, 0) / n);
+    const codigos = {}; L.forEach(x => codigos[x.p.codigo] = (codigos[x.p.codigo] || 0) + 1); const topCod = Object.entries(codigos).sort((a, b) => b[1] - a[1])[0];
+    const durs = L.map(x => +x.r.dur).filter(d => d > 0); const durProm = durs.length ? Math.round(durs.reduce((a, b) => a + b, 0) / durs.length / 60 * 10) / 10 : null;
+    const combos = {}; dobles.forEach(x => { const k = x.p.primarias.join(''); combos[k] = (combos[k] || 0) + 1; }); const topCombo = Object.entries(combos).sort((a, b) => b[1] - a[1])[0];
+    let html = '<h3>Cuadrante dominante del curso</h3><div class="barras">';
+    LETRAS.forEach(k => { html += '<div class="et"><i class="punto" style="background:' + Cq[k].colorOscuro + '"></i> ' + Cq[k].emoji + ' ' + Cq[k].nombre + '</div><div class="tr"><div style="width:' + Math.round(100 * counts[k] / n) + '%;background:' + Cq[k].colorOscuro + '"></div></div><div class="v">' + counts[k] + ' · ' + Math.round(100 * counts[k] / n) + '%</div>'; });
+    html += '</div><h3>Preferencia promedio del curso (% de respuestas)</h3><div class="barras">';
+    LETRAS.forEach(k => { html += '<div class="et"><i class="punto" style="background:' + Cq[k].colorOscuro + '"></i> ' + Cq[k].nombre + '</div><div class="tr"><div style="width:' + prom[k] + '%;background:' + Cq[k].colorOscuro + ';opacity:.75"></div></div><div class="v">' + prom[k] + '%</div>'; });
+    html += '</div><h3>Hemisferios</h3><div class="split"><div style="width:' + izq + '%;background:#2f4f8f">Izquierdo ' + izq + '%</div><div style="width:' + (100 - izq) + '%;background:#8a2f5a">Derecho ' + (100 - izq) + '%</div></div>' +
+      '<h3>Modo</h3><div class="split"><div style="width:' + cort + '%;background:#3a5f9e">Cortical ' + cort + '%</div><div style="width:' + (100 - cort) + '%;background:#5a7a2a">Límbico ' + (100 - cort) + '%</div></div>' +
+      '<div class="kpis"><div class="kpi"><b>' + dobles.length + ' <small style="font-size:.8rem;color:var(--ink-3)">(' + Math.round(100 * dobles.length / n) + '%)</small></b><span>doble dominancia' + (topCombo ? ' · más común: ' + topCombo[0].split('').map(k => Cq[k].nombre).join('+') : '') + '</span></div>' +
+      '<div class="kpi"><b>' + triples.length + '</b><span>multidominantes (3 o 4 primarias)</span></div>' +
+      '<div class="kpi"><b>' + (topCod ? topCod[0] : '–') + '</b><span>código más frecuente' + (topCod ? ' (' + topCod[1] + ')' : '') + '</span></div>' +
+      '<div class="kpi"><b>' + (durProm !== null ? durProm + ' min' : '–') + '</b><span>tiempo promedio</span></div></div>';
+    cont.innerHTML = html;
+  }
+
+  /* ---------- preguntas ---------- */
+  const abiertas = new Set();
+  function pintarPreguntas(L) {
+    const cont = $('tab-preguntas');
+    const con = L.filter(x => typeof x.r.secuencia === 'string' && x.r.secuencia.length === N);
+    if (!con.length) { cont.innerHTML = '<div class="vacio">Aún no hay resultados.</div>'; return; }
+    const frag = document.createDocumentFragment();
+    const h = document.createElement('p'); h.className = 'vacio'; h.style.padding = '0 0 8px'; h.textContent = 'Qué opción eligió el curso en cada situación (' + con.length + ' respuestas). Toca una pregunta para ver el detalle.'; frag.appendChild(h);
+    Q.forEach((q, i) => {
+      const c = { A: 0, B: 0, C: 0, D: 0 }; con.forEach(x => { const l = x.r.secuencia[i]; if (c[l] !== undefined) c[l]++; });
+      const max = Math.max(...LETRAS.map(k => c[k])); const kmax = LETRAS.find(k => c[k] === max); const pctMax = Math.round(100 * max / con.length);
+      const el = document.createElement('div'); el.className = 'preg' + (abiertas.has(i) ? ' abierta' : '');
+      el.innerHTML = '<div class="t"><span></span><span></span></div><div class="pila"></div><div class="det"></div>';
+      el.children[0].children[0].textContent = (i + 1) + '. ' + q.tema; el.children[0].children[1].textContent = pctMax + '% ' + Cq[kmax].nombre;
+      LETRAS.forEach(k => { const b = document.createElement('div'); b.style.width = (100 * c[k] / con.length) + '%'; b.style.background = Cq[k].colorOscuro; b.title = Cq[k].nombre + ': ' + c[k]; el.children[1].appendChild(b); });
+      const det = el.children[2]; const pq = document.createElement('div'); pq.style.gridTemplateColumns = '1fr'; pq.style.marginBottom = '8px'; pq.innerHTML = '<i></i>'; pq.firstChild.textContent = q.texto; det.appendChild(pq);
+      LETRAS.forEach(k => { const d = document.createElement('div'); const b = document.createElement('b'); b.style.color = Cq[k].colorOscuro; b.textContent = Math.round(100 * c[k] / con.length) + '% ' + k; const s = document.createElement('span'); s.textContent = q.opciones[k]; d.append(b, s); det.appendChild(d); });
+      el.addEventListener('click', () => { el.classList.toggle('abierta'); if (el.classList.contains('abierta')) abiertas.add(i); else abiertas.delete(i); });
+      frag.appendChild(el);
+    });
+    cont.innerHTML = ''; cont.appendChild(frag);
+  }
+
+  /* ---------- equipos ---------- */
+  function armarEquipos(L, tam, semilla) {
+    const pools = { A: [], B: [], C: [], D: [] }; L.forEach(x => pools[x.p.principal].push(x));
+    LETRAS.forEach(k => pools[k].sort((a, b) => hash(a.cid + semilla) - hash(b.cid + semilla)));
+    const nEq = Math.max(1, Math.ceil(L.length / tam)); const equipos = Array.from({ length: nEq }, () => []);
+    let e = 0, asignados = 0; const orden = LETRAS.slice().sort((a, b) => pools[b].length - pools[a].length);
+    while (asignados < L.length) {
+      // para cada equipo tomamos el cuadrante que le falte y que tenga gente; si no, el pool más grande
+      const eq = equipos[e % nEq]; if (eq.length >= tam) { e++; continue; }
+      const faltan = orden.filter(k => !eq.some(m => m.p.principal === k) && pools[k].length);
+      const k = faltan[0] || orden.filter(k => pools[k].length).sort((a, b) => pools[b].length - pools[a].length)[0];
+      eq.push(pools[k].shift()); asignados++; e++;
+    }
+    return equipos;
+  }
+  let semillaEq = 1;
+  function pintarEquipos() {
+    const L = listos(); const cont = $('equipos'); cont.innerHTML = '';
+    if (L.length < 2) { cont.innerHTML = '<div class="vacio">Necesitas al menos 2 resultados.</div>'; return; }
+    const tam = +$('sel-tam').value; const eqs = armarEquipos(L, tam, String(semillaEq));
+    eqs.forEach((eq, i) => {
+      const el = document.createElement('div'); el.className = 'equipo'; const div = new Set(eq.map(m => m.p.principal)).size;
+      const h = document.createElement('h4'); h.innerHTML = '<span></span><span style="color:var(--ink-3);font-weight:500"></span>'; h.children[0].textContent = 'Equipo ' + (i + 1); h.children[1].textContent = div + '/4 cuadrantes'; el.appendChild(h);
+      eq.forEach(m => { const d = document.createElement('div'); d.className = 'm'; const p = document.createElement('i'); p.className = 'punto'; p.style.background = Cq[m.p.principal].colorOscuro; const s = document.createElement('span'); s.textContent = m.avatar + ' ' + m.display + ' · ' + Cq[m.p.principal].nombre; d.append(p, s); el.appendChild(d); });
+      cont.appendChild(el);
+    });
+  }
+  $('btn-equipos').addEventListener('click', () => { semillaEq++; pintarEquipos(); });
+  $('sel-tam').addEventListener('change', pintarEquipos);
+
+  /* ---------- discusión ---------- */
+  const PROMPTS = [
+    ['¿Qué cuadrante predomina en el curso? ¿Por qué creen que pasa eso en Ingeniería Comercial?', 'Autoselección de carrera, formación recibida, incentivos de las notas.'],
+    ['¿Alguien se sorprendió con su resultado? ¿En qué situaciones “cambian de cuadrante”?', 'Preferencia ≠ capacidad: el modelo describe lo que prefieres, no lo que puedes.'],
+    ['Piensen en su último grupo de trabajo: ¿lo armaron por amistad o por complementariedad? ¿Qué cuadrantes faltaban?', 'Usa la pestaña Equipos para armar equipos de “cerebro completo”.'],
+    ['¿Cómo lidera cada cuadrante? ¿Cómo comunica un cambio un Analítico vs. un Relacional?', 'Conecta con Kotter: crear urgencia (D/A), coalición (C), plan de corto plazo (B).'],
+    ['¿Quién en el curso es su “opuesto diagonal” (A↔C, B↔D)? ¿Qué les costaría trabajar juntos?', 'Las diagonales son las combinaciones que más tensión generan… y más valor cuando funcionan.'],
+    ['Neurociencia: ¿es verdad que existen personas “de hemisferio derecho”? ¿Qué dice la evidencia?', 'El modelo de Herrmann es una METÁFORA de preferencias de pensamiento (cortical/límbico, izquierdo/derecho), no un mapa anatómico. La neurociencia actual no respalda el neuromito de dominancia hemisférica, pero sí la utilidad de reconocer estilos distintos para liderar y aprender.']
+  ];
+  function pintarDiscusion(L) {
+    const cont = $('tab-discusion'); let html = '';
+    if (L.length) {
+      const n = L.length; const counts = { A: 0, B: 0, C: 0, D: 0 }; L.forEach(x => counts[x.p.principal]++);
+      const ord = LETRAS.slice().sort((a, b) => counts[b] - counts[a]); const top = ord[0], low = ord[3];
+      const izq = Math.round(L.reduce((s, x) => s + x.p.hemisferio.izquierdo, 0) / n); const dobles = L.filter(x => x.p.primarias.length >= 2).length;
+      const diag = L.filter(x => x.p.primarias.length === 2 && ['AC', 'BD'].includes(x.p.primarias.join(''))).length;
+      html += '<h3>Datos del curso para abrir la conversación</h3>';
+      html += '<div class="dato">' + Cq[top].emoji + ' El cuadrante más común es <b>' + Cq[top].nombre + '</b> (' + Math.round(100 * counts[top] / n) + '% del curso) y el menos común, <b>' + Cq[low].nombre + '</b> (' + Math.round(100 * counts[low] / n) + '%).</div>';
+      html += '<div class="dato">🧭 En promedio, el curso usa el hemisferio <b>' + (izq >= 50 ? 'izquierdo' : 'derecho') + '</b> en un ' + Math.max(izq, 100 - izq) + '% de sus respuestas.</div>';
+      html += '<div class="dato">🔀 ' + dobles + ' persona' + (dobles === 1 ? '' : 's') + ' (' + Math.round(100 * dobles / n) + '%) tiene<span style="display:' + (dobles === 1 ? 'none' : 'inline') + '">n</span> más de un cuadrante primario' + (diag ? ', y ' + diag + ' combina' + (diag === 1 ? '' : 'n') + ' una diagonal (datos+personas o plan+ideas), la combinación más escasa.' : '.') + '</div>';
+    }
+    html += '<h3>Preguntas para la clase</h3>';
+    PROMPTS.forEach(p => { html += '<div class="prompt">' + p[0] + '<small>' + p[1] + '</small></div>'; });
+    cont.innerHTML = html;
+  }
+
+  /* ---------- llegada de resultados: ticker, sonido, confetti ---------- */
+  let conocidos = null; const ticker = [];
+  function alLlegarRespuestas() {
+    const L = listos(); const ids = new Set(L.map(x => x.cid));
+    if (conocidos === null) { conocidos = ids; if (S.primeraCarga) { S.primeraCarga = false; } return; }
+    const nuevos = L.filter(x => !conocidos.has(x.cid)); conocidos = ids;
+    if (!nuevos.length) return;
+    nuevos.forEach(x => { ticker.unshift(x.avatar + ' ' + x.display + ' → ' + x.p.titulo); });
+    ticker.splice(8); $('ticker').innerHTML = ''; ticker.forEach(t => { const s = document.createElement('span'); s.textContent = '🎉 ' + t; $('ticker').appendChild(s); });
+    if (UI.sonido) sonar('pop', nuevos[0].p.principal);
+    const V = enLinea(); const contestando = V.filter(v => !v.listo && !ids.has(v.cid));
+    if (!UI.mapaOculto && L.length >= 5 && contestando.length === 0 && !alLlegarRespuestas.fiesta) { alLlegarRespuestas.fiesta = true; setTimeout(() => confetti(2200), 600); }
+  }
+  let audio = null;
+  function sonar(tipo, k) {
+    try {
+      audio = audio || new (window.AudioContext || window.webkitAudioContext)(); if (audio.state === 'suspended') audio.resume();
+      const base = { A: 523.25, B: 392, C: 659.25, D: 783.99 }[k] || 523.25; const t0 = audio.currentTime;
+      const notas = tipo === 'fanfarria' ? [523.25, 659.25, 783.99, 1046.5] : [base, base * 1.5];
+      notas.forEach((f, i) => { const o = audio.createOscillator(), g = audio.createGain(); o.type = 'triangle'; o.frequency.value = f; g.gain.setValueAtTime(0.0001, t0 + i * .11); g.gain.exponentialRampToValueAtTime(.25, t0 + i * .11 + .02); g.gain.exponentialRampToValueAtTime(.0001, t0 + i * .11 + .22); o.connect(g).connect(audio.destination); o.start(t0 + i * .11); o.stop(t0 + i * .11 + .25); });
+    } catch (e) {}
+  }
+  function confetti(ms) {
+    const cv = $('confetti'), ctx = cv.getContext('2d'); cv.width = innerWidth; cv.height = innerHeight;
+    const cols = LETRAS.map(k => Cq[k].colorOscuro).concat(['#fff', '#8fb3f5']);
+    const ps = Array.from({ length: 180 }, () => ({ x: Math.random() * cv.width, y: -20 - Math.random() * cv.height * .5, vx: (Math.random() - .5) * 3, vy: 2 + Math.random() * 4, r: 4 + Math.random() * 6, c: cols[Math.floor(Math.random() * cols.length)], a: Math.random() * 6.28, va: (Math.random() - .5) * .3 }));
+    const t0 = performance.now();
+    (function paso(t) { ctx.clearRect(0, 0, cv.width, cv.height); ps.forEach(p => { p.x += p.vx; p.y += p.vy; p.a += p.va; ctx.save(); ctx.translate(p.x, p.y); ctx.rotate(p.a); ctx.fillStyle = p.c; ctx.fillRect(-p.r / 2, -p.r / 2, p.r, p.r * .6); ctx.restore(); });
+      if (t - t0 < ms) requestAnimationFrame(paso); else ctx.clearRect(0, 0, cv.width, cv.height); })(t0);
+  }
+
+  /* ---------- revelar con animación ---------- */
+  function revelar() {
+    UI.mapaOculto = false; guardaUI('mapaOculto', false);
+    const L = listos(); layoutFirma = ''; nodos.forEach(g => g.remove()); nodos.clear();
+    $('overlay').classList.add('oculto'); $('btn-mapa').textContent = '🙈 Ocultar mapa';
+    if (!L.length) { render(); return; }
+    revelando = true; const miId = ++revelacionId;
+    // los puntos entran uno a uno
+    const pos = calcularPosiciones(L); const capa = $('capa-alumnos'); const paso = Math.min(140, Math.max(35, 2600 / L.length));
+    L.forEach((x, i) => setTimeout(() => {
+      if (miId !== revelacionId) return; // se inició otro revelado (o se ocultó el mapa)
+      const p = pos[i]; if (!nodos.has(p.cid)) { const g = crearNodo(x); aplicarNodo(g, x, p); capa.appendChild(g); nodos.set(p.cid, g); }
+      if (UI.sonido && (i % Math.ceil(L.length / 12) === 0)) sonar('pop', x.p.principal);
+      const counts = { A: 0, B: 0, C: 0, D: 0 }; L.slice(0, i + 1).forEach(y => counts[y.p.principal]++); LETRAS.forEach(k => { $('num-' + k).textContent = counts[k] + ' · ' + Math.round(100 * counts[k] / (i + 1)) + '%'; });
+      if (i === L.length - 1) { layoutFirma = L.map(y => y.cid + ':' + y.p.codigo).join('|') + (UI.nombres ? '#n' : ''); revelando = false; programar(); if (UI.sonido) sonar('fanfarria'); confetti(2600); }
+    }, 400 + i * paso));
+  }
+
+  /* ---------- controles ---------- */
+  $('btn-mapa').addEventListener('click', () => { if (UI.mapaOculto) revelar(); else { UI.mapaOculto = true; guardaUI('mapaOculto', true); revelacionId++; revelando = false; render(); } });
+  $('btn-nombres').addEventListener('click', () => { UI.nombres = !UI.nombres; guardaUI('nombres', UI.nombres); $('mapa').classList.toggle('sin-nombres', !UI.nombres); $('btn-nombres').classList.toggle('activo', UI.nombres); layoutFirma = ''; pintarMapa(listos()); });
+  $('btn-sonido').addEventListener('click', () => { UI.sonido = !UI.sonido; guardaUI('sonido', UI.sonido); $('btn-sonido').textContent = UI.sonido ? '🔊' : '🔇'; if (UI.sonido) sonar('pop', 'A'); });
+  $('btn-full').addEventListener('click', () => { if (document.fullscreenElement) document.exitFullscreen(); else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen(); });
+  $('btn-qr').addEventListener('click', () => $('modal-qr').classList.add('abierto'));
+  $('btn-cerrar-qr').addEventListener('click', () => $('modal-qr').classList.remove('abierto'));
+  $('modal-qr').addEventListener('click', e => { if (e.target === $('modal-qr')) $('modal-qr').classList.remove('abierto'); });
+  $('btn-menu').addEventListener('click', e => { e.stopPropagation(); $('menu').classList.toggle('abierto'); });
+  document.addEventListener('click', e => { if (!$('menu').contains(e.target)) $('menu').classList.remove('abierto'); });
+  $('m-copiar').addEventListener('click', () => { navigator.clipboard && navigator.clipboard.writeText(urlAlumnos).then(() => aviso('Link copiado: ' + urlAlumnos, 3000)); $('menu').classList.remove('abierto'); });
+  $('m-sesion').addEventListener('click', () => { const s = prompt('Código de la sesión (letras, números y guiones). La sesión actual es: ' + SESION, SESION); if (s && s.trim()) { const u = new URL(location.href); u.searchParams.set('s', s.trim().replace(/[^A-Za-z0-9_-]/g, '')); location.href = u.href; } });
+  $('m-csv').addEventListener('click', () => {
+    const L = listos(); if (!L.length) { aviso('No hay resultados que descargar.'); return; }
+    const esc = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const filas = [['nombre', 'apellido', 'nombre_pantalla', 'avatar', 'A_analitico', 'B_organizador', 'C_relacional', 'D_estratega', 'total', 'pct_A', 'pct_B', 'pct_C', 'pct_D', 'principal', 'primarias', 'codigo', 'tipo', 'titulo', 'hemisferio_izq_pct', 'cortical_pct', 'secuencia_respuestas', 'duracion_seg', 'fecha_hora'].join(',')];
+    L.forEach(x => { const r = x.r, p = x.p; filas.push([r.nombre, r.apellido, x.display, x.avatar, p.conteos.A, p.conteos.B, p.conteos.C, p.conteos.D, p.total, p.pct.A, p.pct.B, p.pct.C, p.pct.D, Cq[p.principal].nombre, p.primarias.join(''), p.codigo, p.tipo, p.titulo, p.hemisferio.izquierdo, p.modo.cortical, r.secuencia, r.dur, x.ts ? new Date(x.ts).toISOString() : ''].map(esc).join(',')); });
+    const blob = new Blob(['﻿' + filas.join('\r\n')], { type: 'text/csv;charset=utf-8' }); const a = document.createElement('a'); a.href = URL.createObjectURL(blob); a.download = 'herrmann_' + SESION + '_' + new Date().toISOString().slice(0, 10) + '.csv'; a.click(); setTimeout(() => URL.revokeObjectURL(a.href), 2000);
+    $('menu').classList.remove('abierto');
+  });
+  $('m-borrar').addEventListener('click', () => {
+    $('menu').classList.remove('abierto'); const n = listos().length;
+    const ok = prompt('Vas a borrar ' + n + ' resultado(s) de la sesión "' + SESION + '". Esta acción no se puede deshacer.\nEscribe BORRAR para confirmar:');
+    if (ok !== 'BORRAR') return;
+    FB.remove(FB.ref(db, 'sesiones/' + SESION)).then(() => { conocidos = new Set(); ticker.length = 0; $('ticker').innerHTML = ''; alLlegarRespuestas.fiesta = false; aviso('Sesión reiniciada: listo para una nueva clase.', 4000); }).catch(e => aviso('No se pudo borrar: ' + e.message));
+  });
+  document.querySelectorAll('.tabs button').forEach(b => b.addEventListener('click', () => {
+    document.querySelectorAll('.tabs button').forEach(x => x.classList.toggle('activo', x === b));
+    document.querySelectorAll('.tab').forEach(t => t.classList.toggle('activo', t.id === 'tab-' + b.dataset.tab));
+    if (b.dataset.tab === 'equipos' && !$('equipos').children.length) pintarEquipos();
+  }));
+  document.addEventListener('keydown', e => { if (e.key === 'r' || e.key === 'R') $('btn-mapa').click(); if (e.key === 'n' || e.key === 'N') $('btn-nombres').click(); if (e.key === 'q' || e.key === 'Q') $('btn-qr').click(); if (e.key === 'Escape') { $('modal-qr').classList.remove('abierto'); $('menu').classList.remove('abierto'); } });
+  window.addEventListener('resize', () => { $('confetti').width = innerWidth; $('confetti').height = innerHeight; });
+  setInterval(programar, 15000); // refresca "en línea" aunque no lleguen cambios
+
+  /* ---------- arranque ---------- */
+  construirMapa(); $('btn-nombres').classList.toggle('activo', UI.nombres); $('btn-sonido').textContent = UI.sonido ? '🔊' : '🔇';
+  pintarDiscusion([]); render(); initFirebase();
+})();
+</script>
+</body>
+</html>
